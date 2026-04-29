@@ -342,7 +342,7 @@ def search(q: str = "", product_type: str = "", region_code: str = "", limit: in
         items = [p for p in items if
                  ql in (p.get("brand") or "").lower() or
                  ql in (p.get("product_name") or "").lower() or
-                 str(p.get("barcode") or "") == q or
+                 (str(p.get("barcode") or "") == q and str(p.get("barcode") or "") not in ("nan","None","","<NA>")) or
                  (p.get("acquink_id") or "").lower() == ql]
     if product_type:
         items = [p for p in items
@@ -406,6 +406,188 @@ def get_suggestions():
         "Compare cosmetic brands by regional reach",
         "Which products have allergen warnings?",
     ]
+
+
+# ── Category personas ────────────────────────────────────────────────────────
+CATEGORY_PERSONAS = {
+    "food":      "You are a nutrition and food safety specialist.",
+    "spice":     "You are a nutrition and food safety specialist.",
+    "pickle":    "You are a nutrition and food safety specialist.",
+    "beverage":  "You are a nutrition and food safety specialist.",
+    "cosmetic":  "You are a cosmetic ingredient safety specialist.",
+    "household": "You are a consumer product safety specialist.",
+    "cleaning":  "You are a consumer product safety specialist.",
+    "pharma":    "You are a healthcare product specialist.",
+    "medical_device": "You are a healthcare product specialist.",
+    "toy":       "You are a children product safety specialist.",
+    "incense":   "You are a consumer product safety specialist.",
+}
+
+INTELLIGENCE_TEMPLATE = """{persona}
+
+Analyse this product label data and provide structured intelligence.
+Return your response in this exact format:
+
+**Pros**
+- [key positive point]
+- [key positive point]
+
+**Cautions**
+- [key caution or concern]
+- [key caution or concern]
+
+**Target Consumer**
+[one sentence on ideal consumer segment]
+
+**Verdict**
+[one sentence summary]
+
+Product data:
+Brand: {brand}
+Product: {product_name}
+Type: {product_type}
+FSSAI: {fssai}
+Certifications: {certifications}
+Ingredients ({ingredient_count}): {ingredients}
+Nutrition per 100g: {nutrition}
+Label languages: {languages}
+Regions targeted: {regions}
+Manufacturer: {manufacturer_name}
+
+Be specific. Use only the data provided. Keep each point under 15 words."""
+
+
+class IntelligenceRequest(BaseModel):
+    product_id: str
+
+@app.post("/api/intelligence")
+async def get_intelligence(req: IntelligenceRequest):
+    """Generate and cache product intelligence via the BQ agent."""
+    # Check cache first
+    client = get_bq()
+    if client:
+        try:
+            from google.cloud.bigquery import QueryJobConfig, ScalarQueryParameter
+            cfg = QueryJobConfig(query_parameters=[
+                ScalarQueryParameter("id","STRING",req.product_id)])
+            q = f"""SELECT intelligence_text FROM `{PROJECT}.{DATASET}.{TABLE}`
+                    WHERE barcode=@id OR acquink_id=@id LIMIT 1"""
+            rows = list(client.query(q, job_config=cfg).result())
+            if rows:
+                cached = dict(rows[0]).get("intelligence_text")
+                if cached and str(cached) not in ("nan","None",""):
+                    return {"intelligence": cached, "cached": True}
+        except Exception as e:
+            print(f"[INTEL CACHE CHECK] {e}")
+
+    # Get product data
+    try:
+        p = get_product(req.product_id)
+    except:
+        raise HTTPException(404, "Product not found")
+
+    pt       = (p.get("product_type") or "unknown").lower()
+    persona  = CATEGORY_PERSONAS.get(pt, "You are a consumer product specialist.")
+    nutr_str = ", ".join(f"{k}: {v['value']} {v['unit']}"
+                         for k,v in (p.get("nutrition") or {}).items()) or "Not available"
+    ing_list = (p.get("ingredients") or [])
+
+    prompt = INTELLIGENCE_TEMPLATE.format(
+        persona        = persona,
+        brand          = p.get("brand") or "Unknown",
+        product_name   = p.get("product_name") or "",
+        product_type   = pt,
+        fssai          = p.get("fssai") or "Not found",
+        certifications = ", ".join(p.get("certifications") or []) or "None",
+        ingredients    = ", ".join(ing_list[:15]) or "Not available",
+        ingredient_count = len(ing_list),
+        nutrition      = nutr_str,
+        languages      = ", ".join(p.get("languages") or []) or "Not detected",
+        regions        = ", ".join((p.get("regions") or [])[:8]) or "Not mapped",
+        manufacturer_name = p.get("manufacturer_name") or "Not found",
+    )
+
+    intelligence = ""
+
+    # Call same Vertex agent
+    try:
+        from google.cloud import geminidataanalytics_v1alpha as gda
+        cc = get_data_chat_client()
+        if cc:
+            parent     = f"projects/{PROJECT}/locations/{AGENT_LOCATION}"
+            agent_path = f"{parent}/dataAgents/{AGENT_ID}"
+            conv_id    = f"intel-{req.product_id}-{uuid.uuid4().hex[:6]}"
+            conv_path  = cc.conversation_path(PROJECT, AGENT_LOCATION, conv_id)
+            try:
+                cc.create_conversation(request=gda.CreateConversationRequest(
+                    parent=parent, conversation_id=conv_id,
+                    conversation=gda.Conversation(agents=[agent_path])
+                ))
+            except: pass
+            stream = cc.chat(request={
+                "parent": parent,
+                "conversation_reference": {
+                    "conversation": conv_path,
+                    "data_agent_context": {"data_agent": agent_path}
+                },
+                "messages": [{"user_message": {"text": prompt}}]
+            })
+            for chunk in stream:
+                if hasattr(chunk,"agent_message") and hasattr(chunk.agent_message,"text"):
+                    for part in chunk.agent_message.text.parts:
+                        intelligence += str(part)
+    except Exception as e:
+        print(f"[INTEL AGENT] {e}")
+
+    # Fallback to Gemini direct
+    if not intelligence:
+        model = get_gemini()
+        if model:
+            try:
+                resp = model.generate_content(prompt)
+                intelligence = resp.text or ""
+            except Exception as e:
+                intelligence = f"Intelligence generation failed: {str(e)[:100]}"
+
+    # Cache in BigQuery
+    if intelligence and client:
+        try:
+            safe = intelligence.replace("'","''")
+            pid  = req.product_id.replace("'","''")
+            upd  = f"""UPDATE `{PROJECT}.{DATASET}.{TABLE}`
+                       SET intelligence_text = '{safe}'
+                       WHERE barcode='{pid}' OR acquink_id='{pid}'"""
+            client.query(upd).result()
+            print(f"[INTEL] Cached for {pid}")
+        except Exception as e:
+            print(f"[INTEL CACHE WRITE] {e}")
+
+    return {"intelligence": intelligence, "cached": False}
+
+
+@app.get("/api/accuracy")
+def get_accuracy():
+    """Return accuracy stats at product, category and overall level."""
+    client = get_bq()
+    if not client:
+        return {}
+    try:
+        q = f"""
+        SELECT
+            product_type,
+            COUNT(*) as count,
+            ROUND(AVG(CASE WHEN confidence IS NOT NULL THEN confidence END)*100,1) as avg_conf,
+            COUNTIF(fssai IS NOT NULL AND LENGTH(fssai)>=14) as with_fssai,
+            COUNTIF(brand IS NOT NULL) as with_brand,
+            COUNTIF(languages IS NOT NULL) as with_languages
+        FROM `{PROJECT}.{DATASET}.{TABLE}`
+        GROUP BY product_type
+        ORDER BY count DESC
+        """
+        rows = list(client.query(q).result())
+        return [dict(r) for r in rows]
+    except Exception as e:
+        return {"error": str(e)}
 
 
 # ── Chat API (same pattern as Hotels) ─────────────────────────────────────────
