@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 import json, os, base64, traceback, threading, time, uuid, math
 
-from agent_prompts import get_agent_prompt, build_intelligence_prompt, DATA_CONTEXT_TEMPLATE, DATASET_CONTEXT_TEMPLATE
+from agent_prompts import get_agent_prompt, DATA_CONTEXT_TEMPLATE, DATASET_CONTEXT_TEMPLATE
 
 
 def clean_val(v):
