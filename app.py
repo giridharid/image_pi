@@ -188,6 +188,23 @@ def load_caches():
             ORDER BY brand, product_name
         """).result())
         rows = [clean_row(dict(r)) for r in query_rows]
+        # Normalise back_image: _b.png → _ba.png (GCS has _ba not _b)
+        for row in rows:
+            for field in ("back_image", "front_image", "product_image"):
+                v = row.get(field)
+                if v and str(v).endswith("_b.png"):
+                    row[field] = v[:-6] + "_ba.png"
+            # Fix image_files pipe list too
+            imgs = row.get("image_files")
+            if imgs:
+                fixed = []
+                for f in str(imgs).split("|"):
+                    f = f.strip()
+                    if f.endswith("_b.png"):
+                        f = f[:-6] + "_ba.png"
+                    if f:
+                        fixed.append(f)
+                row["image_files"] = " | ".join(fixed)
         set_cache("products", rows)
         print(f"[CACHE] {len(rows)} products")
 
