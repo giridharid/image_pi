@@ -173,19 +173,31 @@ def load_caches():
     client = get_bq()
     if not client: return
     try:
-        df = client.query(f"""
+        query_rows = list(client.query(f"""
             SELECT * FROM `{PROJECT}.{DATASET}.{TABLE}`
             ORDER BY brand, product_name
-        """).to_dataframe()
-        rows = [clean_row(r) for r in df.to_dict(orient="records")]
+        """).result())
+        rows = [clean_row(dict(r)) for r in query_rows]
         set_cache("products", rows)
         print(f"[CACHE] {len(rows)} products")
 
-        # Stats
-        types  = df["product_type"].value_counts().to_dict()
-        brands = df["brand"].nunique()
-        conf   = float(df["confidence"].mean() * 100) if "confidence" in df else 0
-        langs  = float(df["language_count"].mean()) if "language_count" in df else 0
+        # Stats without pandas
+        types  = {}
+        brands = set()
+        conf_total = 0
+        lang_total = 0
+        conf_count = 0
+        for r in rows:
+            pt = r.get("product_type") or "unknown"
+            types[pt] = types.get(pt, 0) + 1
+            if r.get("brand"): brands.add(r["brand"])
+            if r.get("confidence"):
+                conf_total += float(r["confidence"] or 0)
+                conf_count += 1
+            if r.get("language_count"):
+                lang_total += float(r["language_count"] or 0)
+        conf = (conf_total / conf_count * 100) if conf_count else 0
+        langs = (lang_total / len(rows)) if rows else 0
         set_cache("stats", {
             "total_products": len(rows), "unique_brands": int(brands),
             "food":      types.get("food",0) + types.get("spice",0) + types.get("pickle",0),
