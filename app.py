@@ -318,6 +318,44 @@ async def root():
 async def logo():
     return FileResponse("acquink_logo.png", media_type="image/png")
 
+@app.get("/api/debug/product/{id}")
+def debug_product(id: str):
+    """Debug: show exactly what the cache has for this id."""
+    items = get_cache("products") or []
+    results = []
+    for p in items:
+        bc  = str(p.get("barcode") or "").strip()
+        acq = str(p.get("acquink_id") or "").strip()
+        if id.lower() in bc.lower() or id.lower() in acq.lower() or            id.lower() in (p.get("brand") or "").lower():
+            results.append({
+                "barcode": bc,
+                "acquink_id": acq,
+                "brand": p.get("brand"),
+                "product_name": p.get("product_name"),
+                "product_type": p.get("product_type"),
+                "front_image": p.get("front_image"),
+            })
+    return {
+        "query": id,
+        "cache_size": len(items),
+        "matches": results,
+        "cache_loaded": cache_valid("products"),
+    }
+
+@app.get("/api/debug/cache")
+def debug_cache():
+    """Debug: show cache stats and first 5 products."""
+    items = get_cache("products") or []
+    return {
+        "cache_size": len(items),
+        "cache_loaded": cache_valid("products"),
+        "sample": [
+            {"barcode": p.get("barcode"), "acquink_id": p.get("acquink_id"),
+             "brand": p.get("brand"), "product_type": p.get("product_type")}
+            for p in items[:5]
+        ]
+    }
+
 @app.get("/health")
 @app.get("/api/health")
 async def health():
