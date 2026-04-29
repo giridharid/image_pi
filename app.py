@@ -724,14 +724,90 @@ multiple products, comparisons, rankings, or statistics — run a SQL query agai
 gen-lang-client-0143536012.gs1_datakart.products and return real data.
 Never say "broader dataset required" — you already have it. Query it."""
 
+    # ── Pre-execute BQ for cross-product questions ──────────────────────────
+    bq_results_text = ""
+    cross_product_keywords = [
+        "highest","lowest","most","least","which product","which brand",
+        "compare","ranking","rank","top","bottom","all products","all food",
+        "across","average","sodium","sugar","calories","energy","protein",
+        "fat","ingredients","FSSAI","missing","compliance","how many",
+        "list all","show all","what products"
+    ]
+    is_cross_product = any(kw.lower() in request.message.lower() for kw in cross_product_keywords)
+
+    if is_cross_product and not request.product_id:
+        try:
+            bq = get_bq()
+            if bq:
+                # Build a targeted query based on question intent
+                msg_lower = request.message.lower()
+                if any(x in msg_lower for x in ["sodium","salt"]):
+                    q = """SELECT brand, product_name, product_type,
+                        CAST(n_sodium AS STRING) AS n_sodium, n_sodium_unit
+                        FROM `gen-lang-client-0143536012.gs1_datakart.products`
+                        WHERE n_sodium IS NOT NULL AND product_type IN ('food','spice','pickle','beverage')
+                        ORDER BY n_sodium DESC LIMIT 10"""
+                elif any(x in msg_lower for x in ["calori","energy","kcal"]):
+                    q = """SELECT brand, product_name, product_type,
+                        CAST(n_energy AS STRING) AS n_energy, n_energy_unit
+                        FROM `gen-lang-client-0143536012.gs1_datakart.products`
+                        WHERE n_energy IS NOT NULL ORDER BY n_energy DESC LIMIT 10"""
+                elif any(x in msg_lower for x in ["sugar"]):
+                    q = """SELECT brand, product_name,
+                        CAST(n_total_sugars AS STRING) AS n_total_sugars, n_total_sugars_unit
+                        FROM `gen-lang-client-0143536012.gs1_datakart.products`
+                        WHERE n_total_sugars IS NOT NULL ORDER BY n_total_sugars DESC LIMIT 10"""
+                elif any(x in msg_lower for x in ["protein"]):
+                    q = """SELECT brand, product_name,
+                        CAST(n_protein AS STRING) AS n_protein, n_protein_unit
+                        FROM `gen-lang-client-0143536012.gs1_datakart.products`
+                        WHERE n_protein IS NOT NULL ORDER BY n_protein DESC LIMIT 10"""
+                elif any(x in msg_lower for x in ["fat"]):
+                    q = """SELECT brand, product_name,
+                        CAST(n_total_fat AS STRING) AS n_total_fat, n_total_fat_unit
+                        FROM `gen-lang-client-0143536012.gs1_datakart.products`
+                        WHERE n_total_fat IS NOT NULL ORDER BY n_total_fat DESC LIMIT 10"""
+                elif any(x in msg_lower for x in ["fssai","compliance","certified","missing"]):
+                    q = """SELECT brand, product_name, product_type, fssai,
+                        CASE WHEN fssai IS NULL THEN 'MISSING' ELSE 'OK' END AS fssai_status
+                        FROM `gen-lang-client-0143536012.gs1_datakart.products`
+                        WHERE product_type IN ('food','spice','pickle','beverage','cosmetic','pharma')
+                        ORDER BY fssai_status DESC, brand LIMIT 20"""
+                elif any(x in msg_lower for x in ["ingredient","how many ingredient"]):
+                    q = """SELECT brand, product_name, product_type, ingredient_count, ingredients
+                        FROM `gen-lang-client-0143536012.gs1_datakart.products`
+                        WHERE ingredient_count IS NOT NULL ORDER BY ingredient_count DESC LIMIT 10"""
+                else:
+                    q = """SELECT brand, product_name, product_type, mrp, net_weight, fssai,
+                        n_energy, n_sodium, n_total_fat, ingredient_count, confidence
+                        FROM `gen-lang-client-0143536012.gs1_datakart.products`
+                        ORDER BY brand, product_name LIMIT 30"""
+
+                rows = list(bq.query(q).result())
+                if rows:
+                    lines = []
+                    for r in rows:
+                        lines.append(" | ".join(f"{k}: {v}" for k, v in dict(r).items() if v is not None))
+                    bq_results_text = "\n=== LIVE BIGQUERY DATA ===\n" + "\n".join(lines)
+                    print(f"[CHAT] BQ pre-query: {len(rows)} rows")
+        except Exception as e:
+            print(f"[CHAT] BQ pre-query failed: {e}")
+
     full_prompt = f"""{system_prompt}
 
 {data_context}
+{bq_results_text}
 
 === USER QUERY ===
 {request.message}
 
-Remember: Use ONLY the data above or query BigQuery. Never invent numbers."""
+CRITICAL RULES FOR YOUR RESPONSE:
+1. Answer in plain conversational English. Use bullet points or a simple table if helpful.
+2. NEVER show SQL code. NEVER use code blocks. The user is a business person, not a developer.
+3. Use the LIVE BIGQUERY DATA above to answer with real product names and numbers.
+4. If data shows unusual values (e.g. sodium 3.4g which seems high), flag it as a possible OCR issue.
+5. Be concise — 3 to 8 lines maximum unless a list is needed.
+6. Never say you cannot access the database. The data is already provided above."""
 
     conv_id       = request.conversation_id or f"gs1-{uuid.uuid4().hex[:8]}"
     response_text = ""
