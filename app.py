@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 import json, os, base64, traceback, threading, time, uuid, math
 
-from agent_prompts import get_agent_prompt, DATA_CONTEXT_TEMPLATE, DATASET_CONTEXT_TEMPLATE
+from agent_prompts import get_agent_prompt, build_intelligence_prompt, DATA_CONTEXT_TEMPLATE, DATASET_CONTEXT_TEMPLATE
 
 
 def clean_val(v):
@@ -696,9 +696,11 @@ Back image:  {back_url}
 === INGREDIENTS ({p.get('ingredient_count') or len(ing)}) ===
 {ing_lines}
 
-INSTRUCTION: Use ONLY the exact data above. Never invent numbers.
-If barcode_verified=False → note it needs GS1 verification.
-Include image URLs when showing this product."""
+INSTRUCTION: Use ONLY the above data for THIS product.
+For cross-product questions (e.g. "which product has highest sodium") — query BigQuery directly.
+Table: gen-lang-client-0143536012.gs1_datakart.products
+Key nutrition columns: n_sodium, n_energy, n_protein, n_total_fat, n_total_carbohydrate
+Never say "broader dataset required" — you have full BigQuery access."""
         except Exception as e:
             data_context = f"No product context. Dataset: {stats.get('total_products',0)} products indexed."
     else:
@@ -707,10 +709,20 @@ Include image URLs when showing this product."""
 {stats.get('total_products',0)} products | {stats.get('unique_brands',0)} brands
 Food: {stats.get('food',0)} | Cosmetic: {stats.get('cosmetic',0)} | Household: {stats.get('household',0)}
 Avg confidence: {stats.get('avg_confidence',0)}%
-BigQuery: gen-lang-client-0143536012.gs1_datakart.products
-Images: https://storage.googleapis.com/gs1-datakart-images/
 
-INSTRUCTION: Query the BigQuery table to answer accurately. Never fabricate data."""
+BigQuery table: gen-lang-client-0143536012.gs1_datakart.products
+Key columns: barcode, acquink_id, brand, product_name, product_type,
+             fssai, mrp, net_weight, manufacturer_name,
+             n_energy, n_protein, n_total_carbohydrate, n_total_fat,
+             n_sodium, n_total_sugars, n_dietary_fiber, n_saturated_fat,
+             ingredients, ingredient_count, languages, language_count,
+             regions, certifications, confidence, intelligence_text,
+             front_image, back_image
+
+INSTRUCTION: You have DIRECT access to this BigQuery table. For any question about
+multiple products, comparisons, rankings, or statistics — run a SQL query against
+gen-lang-client-0143536012.gs1_datakart.products and return real data.
+Never say "broader dataset required" — you already have it. Query it."""
 
     full_prompt = f"""{system_prompt}
 

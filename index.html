@@ -12,44 +12,18 @@
 
 /* ── Theme variables (same structure as Hotels, orange instead of purple) ── */
 :root{
-  --bg:#0a0c14;
-  --bg2:#0d1020;
-  --bg3:#101828;
-  --bg4:#141e30;
-  --bg5:rgba(18,24,40,.92);
-  --border:rgba(40,60,100,.5);
-  --border2:rgba(255,107,53,.2);
-  --text:#e2e8f0;
-  --text2:#c4cee0;
-  --text3:#8b9bbc;
-  --text4:#5a6b88;
-  --text5:#3a4b68;
-  --accent:#FF6B35;
-  --accent2:#ff8f65;
-  --card-bg:rgba(13,16,32,.7);
-  --card-border:rgba(40,60,100,.3);
-  --input-bg:#090c18;
-  --shadow:rgba(0,0,0,.5);
+  --bg:#0a0814;--bg2:#0f0c1d;--bg3:#100d1e;--bg4:#13102a;--bg5:rgba(20,15,38,.9);
+  --border:rgba(45,33,84,.5);--border2:rgba(168,85,247,.18);
+  --text:#e2e8f0;--text2:#c4b8d8;--text3:#8b7fc0;--text4:#5a4e7a;--text5:#4a3f6b;
+  --accent:#FF6B35;--accent2:#c4b5fd;--card-bg:rgba(15,11,28,.7);--card-border:rgba(45,33,84,.3);
+  --input-bg:#0d0b1a;--shadow:rgba(0,0,0,.5);
 }
 body.light{
-  --bg:#f5f4f0;
-  --bg2:#eeecea;
-  --bg3:#e5e3df;
-  --bg4:#ffffff;
-  --bg5:rgba(255,255,255,.98);
-  --border:rgba(200,180,150,.25);
-  --border2:rgba(255,107,53,.3);
-  --text:#1a1510;
-  --text2:#3d3020;
-  --text3:#6b5e45;
-  --text4:#908070;
-  --text5:#b0a090;
-  --accent:#e85520;
-  --accent2:#cc4010;
-  --card-bg:#ffffff;
-  --card-border:rgba(200,180,150,.2);
-  --input-bg:#ffffff;
-  --shadow:rgba(90,60,30,.1);
+  --bg:#f5f4fa;--bg2:#f0eef8;--bg3:#e8e5f5;--bg4:#ffffff;--bg5:rgba(255,255,255,.98);
+  --border:rgba(140,120,210,.2);--border2:rgba(109,40,217,.25);
+  --text:#1a1535;--text2:#3d3060;--text3:#6b5ea8;--text4:#9080c0;--text5:#b0a0d8;
+  --accent:#FF6B35;--accent2:#5b21b6;--card-bg:#ffffff;--card-border:rgba(140,120,210,.15);
+  --input-bg:#ffffff;--shadow:rgba(90,60,180,.1);
 }
 
 body{background:var(--bg);color:var(--text);min-height:100vh;font-family:'DM Sans',system-ui,sans-serif;font-size:14px;display:flex;flex-direction:column;transition:background .2s,color .2s}
@@ -69,7 +43,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;font-family:'DM San
 
 /* ── Search ── */
 .search-wrap{position:relative;width:340px}
-#productSearch{width:100%;background:rgba(40,60,100,.4);border:1px solid var(--border2);color:var(--text);padding:7px 14px 7px 36px;border-radius:22px;font-size:12px;outline:none;font-family:inherit;transition:border-color .2s}
+#productSearch{width:100%;background:rgba(45,33,84,.4);border:1px solid var(--border2);color:var(--text);padding:7px 14px 7px 36px;border-radius:22px;font-size:12px;outline:none;font-family:inherit;transition:border-color .2s}
 #productSearch:focus{border-color:rgba(255,107,53,.5)}
 #productSearch::placeholder{color:var(--text4)}
 .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text4);font-size:14px;pointer-events:none}
@@ -89,13 +63,13 @@ body{background:var(--bg);color:var(--text);min-height:100vh;font-family:'DM San
 .mode-tab.active-tab{background:linear-gradient(135deg,#e85520,#cc3300);color:#fff;box-shadow:0 2px 12px rgba(255,107,53,.35)}
 #chatToggle{background:rgba(255,107,53,.12);border:1px solid var(--border2);border-radius:8px;padding:7px 14px;color:var(--accent2);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;font-weight:500;transition:all .2s}
 #chatToggle:hover{background:rgba(255,107,53,.22)}
-#themeToggle{background:rgba(40,60,100,.4);border:1px solid var(--border);border-radius:8px;padding:6px 11px;cursor:pointer;color:var(--text3);font-size:14px;margin-left:6px;transition:all .2s;font-family:inherit;position:relative}
+#themeToggle{background:rgba(45,33,84,.4);border:1px solid var(--border);border-radius:8px;padding:6px 11px;cursor:pointer;color:var(--text3);font-size:14px;margin-left:6px;transition:all .2s;font-family:inherit;position:relative}
 #themeToggle:hover{background:rgba(255,107,53,.15)}
 #themeToggle:hover::after{content:attr(title);position:absolute;top:calc(100%+6px);right:0;background:var(--bg4);color:var(--text);font-size:11px;padding:4px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;z-index:999;border:1px solid var(--border)}
 
 /* ── Filter row ── */
 .filter-row{background:var(--bg2);padding:9px 20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);flex-wrap:wrap}
-.fchip{background:rgba(40,60,100,.3);border:1px solid var(--border);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:500;cursor:pointer;color:var(--text3);transition:all .15s;font-family:inherit}
+.fchip{background:rgba(45,33,84,.3);border:1px solid var(--border);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:500;cursor:pointer;color:var(--text3);transition:all .15s;font-family:inherit}
 .fchip:hover{border-color:var(--accent);color:var(--accent)}
 .fchip.on{background:linear-gradient(135deg,#7c3aed,#6366f1);color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(124,58,237,.3)}
 .fchip span{font-size:9px;opacity:.7;margin-left:2px}
@@ -199,16 +173,16 @@ body{background:var(--bg);color:var(--text);min-height:100vh;font-family:'DM San
 .rl-cnt{background:var(--accent);color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
 
 /* ── Chat panel (same fixed right panel as Hotels) ── */
-#chatPanel{position:fixed;right:0;top:0;height:100%;width:44vw;min-width:420px;max-width:700px;background:linear-gradient(180deg,#0e0a1f 0%,#0b0818 100%);border-left:1px solid var(--border2);z-index:300;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+#chatPanel{position:fixed;right:0;top:0;height:100%;width:44vw;min-width:420px;max-width:700px;background:linear-gradient(180deg,#0e0a1f 0%,#0b0818 100%);border-left:1px solid rgba(168,85,247,.15);z-index:300;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
 #chatPanel.open{transform:translateX(0)}
 .chat-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:rgba(10,14,28,.6)}
 .chat-title{color:var(--accent2);font-size:14px;font-weight:700;letter-spacing:-.1px}
 #chatContextLabel{color:var(--text4);font-size:11px;margin-top:2px}
 .chat-hdr-btns{display:flex;gap:6px}
-.chat-hdr-btn{background:rgba(40,60,100,.4);border:none;color:var(--text3);cursor:pointer;font-size:13px;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.chat-hdr-btn{background:rgba(45,33,84,.4);border:none;color:var(--text3);cursor:pointer;font-size:13px;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .2s}
 .chat-hdr-btn:hover{background:rgba(255,107,53,.2);color:var(--accent2)}
 #chatMessages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
-.msg-user{align-self:flex-end;background:linear-gradient(135deg,#4c1d95,#3730a3);border-radius:14px 14px 3px 14px;padding:10px 15px;max-width:82%;color:var(--text);font-size:12.5px;line-height:1.6;box-shadow:0 2px 12px rgba(255,107,53,.2)}
+.msg-user{align-self:flex-end;background:linear-gradient(135deg,#4c1d95,#3730a3);border-radius:14px 14px 3px 14px;padding:10px 15px;max-width:82%;color:var(--text);font-size:12.5px;line-height:1.6;box-shadow:0 2px 12px rgba(124,58,237,.25)}
 .msg-bot{align-self:flex-start;background:var(--bg4);border:1px solid var(--border);border-radius:14px 14px 14px 3px;padding:12px 16px;max-width:92%;color:var(--text2);font-size:12.5px;line-height:1.7}
 .msg-bot strong{color:var(--accent2);font-weight:600}
 .msg-bot h3{color:var(--accent);font-size:13px;font-weight:700;margin:10px 0 5px;padding-bottom:4px;border-bottom:1px solid var(--border)}
@@ -233,7 +207,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;font-family:'DM San
 #chatOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:290}
 #chatOverlay.show{display:block}
 .chat-suggestions{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-.chat-sug{background:rgba(40,60,100,.3);border:1px solid var(--border2);color:var(--text3);padding:4px 11px;border-radius:20px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .2s}
+.chat-sug{background:rgba(45,33,84,.3);border:1px solid var(--border2);color:var(--text3);padding:4px 11px;border-radius:20px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .2s}
 .chat-sug:hover{background:rgba(255,107,53,.15);color:var(--accent2);border-color:var(--border2)}
 
 /* Loader */
@@ -258,10 +232,10 @@ body.light .mode-tab:hover{background:rgba(232,85,32,.08)}
 body.light .active-tab{background:linear-gradient(135deg,#e85520,#cc3300)!important;color:#fff!important}
 body.light #productSearch{background:#ffffff;color:var(--text);border:1px solid rgba(200,150,100,.3)}
 body.light #searchDropdown{background:#ffffff;border:1px solid rgba(200,150,100,.3)}
-body.light #chatPanel{background:#ffffff;border-left:1px solid #e0daf0;box-shadow:-8px 0 32px rgba(90,60,180,.1)}
+body.light #chatPanel{position:fixed;right:0;top:0;height:100%;width:44vw;min-width:420px;max-width:700px;background:linear-gradient(180deg,#0e0a1f 0%,#0b0818 100%);border-left:1px solid rgba(168,85,247,.15);z-index:300;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
 body.light .chat-header{background:#f8f4f0;border-bottom:1px solid rgba(200,150,100,.2)}
 body.light .msg-bot{background:#f5f0ec;border:1px solid rgba(200,150,100,.2);color:var(--text)}
-body.light .msg-user{background:linear-gradient(135deg,#cc4010,#aa2800)}
+body.light .msg-user{align-self:flex-end;background:linear-gradient(135deg,#4c1d95,#3730a3);border-radius:14px 14px 3px 14px;padding:10px 15px;max-width:82%;color:var(--text);font-size:12.5px;line-height:1.6;box-shadow:0 2px 12px rgba(124,58,237,.25)}
 body.light #chatInput{background:#ffffff;color:var(--text);border:1px solid rgba(200,150,100,.3)}
 body.light .det-left{background:var(--bg2)}
 
@@ -280,8 +254,19 @@ body.light .det-left{background:var(--bg2)}
   .detail-layout{grid-template-columns:1fr}
   .map-wrap{grid-template-columns:1fr}
   .stats-row{grid-template-columns:repeat(2,1fr)}
-  #chatPanel{width:100%;min-width:0;max-width:100%}
+  #chatPanel{position:fixed;right:0;top:0;height:100%;width:44vw;min-width:420px;max-width:700px;background:linear-gradient(180deg,#0e0a1f 0%,#0b0818 100%);border-left:1px solid rgba(168,85,247,.15);z-index:300;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
 }
+
+body.light .topbar{background:#ffffff;border-bottom:1px solid #e0daf0;box-shadow:0 2px 12px rgba(90,60,180,.08)}
+body.light .tabs-bar{background:#f8f7fd;border-bottom:1px solid #e0daf0}
+body.light .filter-row{background:#f0eefa;border-bottom:1px solid #e0daf0}
+body.light .stat-card{background:#ffffff;border:1px solid #e0daf0}
+body.light .card{background:#ffffff;border:1px solid #e0daf0}
+body.light .pcard{background:#ffffff;border:1px solid #e0daf0}
+body.light .fchip{background:rgba(109,40,217,.06);color:#6b5ea8;border:1px solid rgba(140,120,210,.3)}
+body.light #productSearch{background:#ffffff;color:#1a1535;border:1px solid rgba(140,120,210,.3)}
+body.light .fact{background:#f0eefa}
+body.light .det-left{background:#f8f7fd}
 </style>
 </head>
 <body>
@@ -339,7 +324,7 @@ body.light .det-left{background:var(--bg2)}
 <div class="tabs-bar">
   <div class="tab-group">
     <button class="mode-tab active-tab" onclick="showTab('products',this)">Products</button>
-    <button class="mode-tab" onclick="showTab('region',this)">Region Map</button>
+    <button class="mode-tab" style="display:none" onclick="showTab('region',this)">Region Map</button>
   </div>
 </div>
 
@@ -363,7 +348,7 @@ body.light .det-left{background:var(--bg2)}
     <div class="stats-row">
       <div class="stat-card"><div class="stat-lbl">Products</div><div class="stat-val" id="sTotal">—</div></div>
       <div class="stat-card"><div class="stat-lbl">Brands</div><div class="stat-val" id="sBrands">—</div></div>
-      <div class="stat-card"><div class="stat-lbl">Avg Scripts</div><div class="stat-val" id="sLangs">—</div></div>
+      <div class="stat-card"><div class="stat-lbl">Avg Languages</div><div class="stat-val" id="sLangs">—</div></div>
       <div class="stat-card"><div class="stat-lbl">Accuracy</div><div class="stat-val" id="sConf">—</div></div>
     </div>
     <div class="pgrid" id="productGrid"></div>
@@ -378,8 +363,9 @@ body.light .det-left{background:var(--bg2)}
   <div id="tab-region" class="hidden">
     <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px">India Region Intelligence</div>
     <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Product distribution by target state. Darker = more products. Click any state to filter.</div>
-    <div class="map-wrap">
-      <div class="map-card">
+    <div class="map-wrap" style="grid-template-columns:1fr">
+      <!-- India SVG heatmap temporarily disabled -->
+      <div style="display:none">
         <svg id="indiaMap" viewBox="0 0 600 650" xmlns="http://www.w3.org/2000/svg">
           <g id="mapStates" stroke="var(--bg2)" stroke-width="0.8" cursor="pointer">
             <path id="IN-JK" d="M160,30 L200,20 L240,35 L260,60 L240,90 L200,100 L170,80 L150,60 Z"/>
@@ -434,6 +420,7 @@ body.light .det-left{background:var(--bg2)}
           <span>0</span><div class="leg-grad"></div><span>Most products</span>
         </div>
       </div>
+      </div><!-- end hidden map -->
       <div class="region-list-card">
         <div class="rl-header">States by product count</div>
         <div id="regionList"></div>
@@ -574,6 +561,7 @@ document.getElementById("chatInput").addEventListener("keydown", e => {
 async function loadStats() {
   try {
     const d = await fetchJSON("/api/stats");
+    _cachedStats = d;
     document.getElementById("sTotal").textContent  = d.total_products ?? "—";
     document.getElementById("sBrands").textContent = d.unique_brands  ?? "—";
     document.getElementById("sLangs").textContent  = d.avg_languages  ?? "—";
@@ -608,6 +596,7 @@ async function loadProducts(q="", type="") {
 }
 
 function renderGrid(items) {
+  updateStatsFromProducts(items);
   if(!items.length) {
     document.getElementById("productGrid").innerHTML =
       `<div style="color:var(--text3);padding:20px;text-align:center">No products found</div>`;
@@ -648,7 +637,31 @@ function setFilter(el, type) {
   document.querySelectorAll(".fchip").forEach(c => c.classList.remove("on"));
   el.classList.add("on");
   loadProducts("", type);
+  updateFilterStats(type);
 }
+
+function updateFilterStats(type) {
+  const stats = get_cache_stats();
+  if(!stats) return;
+  const types = stats.product_types || {};
+  const total = stats.total_products || 0;
+
+  if(!type) {
+    document.getElementById("sTotal").textContent = total || "—";
+    document.getElementById("sBrands").textContent = stats.unique_brands || "—";
+    document.getElementById("sLangs").textContent = stats.avg_languages || "—";
+    document.getElementById("sConf").textContent = stats.avg_confidence ? stats.avg_confidence+"%" : "—";
+  } else {
+    const count = types[type] || 0;
+    document.getElementById("sTotal").textContent = count;
+    document.getElementById("sBrands").textContent = "—";
+    document.getElementById("sLangs").textContent = "—";
+    document.getElementById("sConf").textContent = "—";
+  }
+}
+
+let _cachedStats = null;
+function get_cache_stats() { return _cachedStats; }
 
 // ── Product detail ─────────────────────────────────────────────────────────
 async function openDetail(id) {
@@ -860,10 +873,19 @@ function swPanel(panel) {
   const img = document.getElementById("pImg");
   if(!img) return;
   const url = imgUrl(currentProd, panel);
-  if(url) img.src = url;
-  document.querySelectorAll(".psw").forEach(b => b.classList.remove("active"));
-  const btn = panel==="front" ? document.getElementById("bFront") : document.getElementById("bBack");
-  if(btn) btn.classList.add("active");
+  if(url) {
+    img.src = url;
+    document.querySelectorAll(".psw").forEach(b => b.classList.remove("active"));
+    const btn = panel==="front" ? document.getElementById("bFront") : document.getElementById("bBack");
+    if(btn) btn.classList.add("active");
+  } else {
+    // No image for this panel - stay on current, keep front active
+    const bFront = document.getElementById("bFront");
+    if(bFront) {
+      bFront.classList.add("active");
+      document.getElementById("bBack") && document.getElementById("bBack").classList.remove("active");
+    }
+  }
 }
 function backToGrid() {
   currentProd = null;
