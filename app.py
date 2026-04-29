@@ -209,7 +209,7 @@ def load_caches():
         conf = (conf_total / conf_count * 100) if conf_count else 0
         langs = (lang_total / len(rows)) if rows else 0
         set_cache("stats", {
-            "total_products": len(rows), "unique_brands": int(brands),
+            "total_products": len(rows), "unique_brands": len(brands),
             "food":      types.get("food",0) + types.get("spice",0) + types.get("pickle",0),
             "cosmetic":  types.get("cosmetic",0),
             "household": types.get("household",0),
