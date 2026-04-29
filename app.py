@@ -164,6 +164,47 @@ NUTRIENT_COLS = [
     ("n_iron",              "n_iron_unit",               "Iron"),
 ]
 
+GCS_BASE_URL = f"https://storage.googleapis.com/{GCS_BUCKET}"
+
+def derive_images(row: dict) -> dict:
+    """Derive image URLs from barcode or source file when columns are empty."""
+    barcode = str(row.get("barcode") or "").strip()
+    acquink = str(row.get("acquink_id") or "").strip()
+    source  = str(row.get("file") or row.get("source_number") or "").strip()
+
+    # For numbered images (ACQ-xxx), use source filename
+    if acquink.startswith("ACQ-") and source:
+        num = source.replace(".jpg","").replace(".png","").strip()
+        img = f"{num}.jpg"
+        if not row.get("product_image") or str(row.get("product_image","")) in ("nan","None",""):
+            row["product_image"] = img
+        return row
+
+    # For barcoded products, derive from barcode
+    if not barcode or barcode in ("nan","None",""):
+        return row
+
+    # Check image_files for the actual extension
+    img_files = str(row.get("image_files") or "")
+    ext = ".jpg" if ".jpg" in img_files else ".png"
+
+    if not row.get("front_image") or str(row.get("front_image","")) in ("nan","None",""):
+        row["front_image"] = f"{barcode}_f{ext}"
+    if not row.get("back_image") or str(row.get("back_image","")) in ("nan","None",""):
+        row["back_image"] = f"{barcode}_ba{ext}"
+    if not row.get("product_image") or str(row.get("product_image","")) in ("nan","None",""):
+        row["product_image"] = f"{barcode}_ba{ext}"
+
+    # Fix _b.ext → _ba.ext
+    for field in ("front_image","back_image","product_image"):
+        v = str(row.get(field,"") or "")
+        for e in (".png",".jpg"):
+            if v.endswith(f"_b{e}"):
+                row[field] = v[:-len(f"_b{e}")] + f"_ba{e}"
+
+    return row
+
+
 def build_nutrition(row: dict) -> dict:
     nutr = {}
     for val_col, unit_col, name in NUTRIENT_COLS:
@@ -188,7 +229,9 @@ def load_caches():
             ORDER BY brand, product_name
         """).result())
         rows = [clean_row(dict(r)) for r in query_rows]
-        # Normalise back_image: _b.png → _ba.png (GCS has _ba not _b)
+        # Derive and normalise image filenames from barcode
+        for row in rows:
+            derive_images(row)
         for row in rows:
             for field in ("back_image", "front_image", "product_image"):
                 v = row.get(field)
@@ -336,6 +379,7 @@ def get_product(id: str):
         if str(p.get("barcode") or "") == id or \
            str(p.get("acquink_id") or "") == id:
             result = dict(p)
+            p = derive_images(p)
             result["nutrition"]     = build_nutrition(p)
             result["ingredients"]   = parse_list(p.get("ingredients"))
             result["languages"]     = parse_list(p.get("languages"))

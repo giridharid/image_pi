@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GS1 DataKart | Acquink Intelligence</title>
+<title>Product Intelligence | Acquink</title>
 <link rel="icon" type="image/png" href="/acquink_logo.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -98,6 +98,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;font-family:'DM San
 .fchip{background:rgba(40,60,100,.3);border:1px solid var(--border);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:500;cursor:pointer;color:var(--text3);transition:all .15s;font-family:inherit}
 .fchip:hover{border-color:var(--accent);color:var(--accent)}
 .fchip.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(255,107,53,.35)}
+.fchip span{font-size:9px;opacity:.7;margin-left:2px}
 
 /* ── Main ── */
 .main{padding:16px 20px;flex:1}
@@ -311,7 +312,7 @@ body.light .det-left{background:var(--bg2)}
 <div class="topbar">
   <div class="logo">
     <img src="/acquink_logo.png" class="logo-sq" onerror="this.style.display='none'"/>
-    <div><div class="logo-name">GS1 DataKart</div><div class="logo-sub">Product Label Intelligence · Acquink</div></div>
+    <div><div class="logo-name">Product Intelligence</div><div class="logo-sub">Powered by MASI · Acquink</div></div>
   </div>
   <div class="search-wrap">
     <span class="search-icon">⌕</span>
@@ -334,13 +335,13 @@ body.light .det-left{background:var(--bg2)}
 
 <!-- Filter row -->
 <div class="filter-row" id="filterRow">
-  <div class="fchip on" onclick="setFilter(this,'')">All</div>
-  <div class="fchip" onclick="setFilter(this,'food')">Food</div>
-  <div class="fchip" onclick="setFilter(this,'spice')">Spice</div>
-  <div class="fchip" onclick="setFilter(this,'cosmetic')">Cosmetic</div>
-  <div class="fchip" onclick="setFilter(this,'household')">Household</div>
-  <div class="fchip" onclick="setFilter(this,'cleaning')">Cleaning</div>
-  <div class="fchip" onclick="setFilter(this,'toy')">Toy</div>
+  <div class="fchip on" onclick="setFilter(this,'')">All <span id="cnt-all"></span></div>
+  <div class="fchip" onclick="setFilter(this,'food')">Food <span id="cnt-food"></span></div>
+  <div class="fchip" onclick="setFilter(this,'spice')">Spice <span id="cnt-spice"></span></div>
+  <div class="fchip" onclick="setFilter(this,'cosmetic')">Cosmetic <span id="cnt-cosmetic"></span></div>
+  <div class="fchip" onclick="setFilter(this,'household')">Household <span id="cnt-household"></span></div>
+  <div class="fchip" onclick="setFilter(this,'cleaning')">Cleaning <span id="cnt-cleaning"></span></div>
+  <div class="fchip" onclick="setFilter(this,'toy')">Toy <span id="cnt-toy"></span></div>
 </div>
 
 <!-- Main -->
@@ -432,8 +433,8 @@ body.light .det-left{background:var(--bg2)}
 </div><!-- main -->
 
 <div class="footer">
-  <span>GS1 DataKart · <span class="masi">MASI</span> powered by Acquink Solutions</span>
-  <span>gen-lang-client-0143536012.gs1_datakart.products</span>
+  <span>Product Intelligence · <span class="masi">MASI</span> by Acquink Solutions</span>
+  <span>gen-lang-client-0143536012 · gs1_datakart</span>
 </div>
 
 <script>
@@ -566,6 +567,17 @@ async function loadStats() {
     document.getElementById("sBrands").textContent = d.unique_brands  ?? "—";
     document.getElementById("sLangs").textContent  = d.avg_languages  ?? "—";
     document.getElementById("sConf").textContent   = d.avg_confidence ? d.avg_confidence+"%" : "—";
+    // Update chip counts
+    const types = d.product_types || {};
+    const food = (types.food||0)+(types.spice||0)+(types.pickle||0)+(types.beverage||0);
+    const el = (id,v) => { const e=document.getElementById(id); if(e&&v) e.textContent=`(${v})`; };
+    el("cnt-all",   d.total_products);
+    el("cnt-food",  types.food||0);
+    el("cnt-spice", types.spice||0);
+    el("cnt-cosmetic", types.cosmetic||0);
+    el("cnt-household", types.household||0);
+    el("cnt-cleaning", types.cleaning||0);
+    el("cnt-toy",   types.toy||0);
   } catch(e) {}
 }
 
@@ -610,6 +622,7 @@ function renderGrid(items) {
       <div class="pcard-type">${type}</div>
       <div class="pcard-brand">${escHTML(p.brand||"Unknown")}${unv}</div>
       <div class="pcard-name">${escHTML(p.product_name||"")}</div>
+      <div style="font-family:monospace;font-size:9px;color:var(--text4);margin:2px 0">${escHTML(String(p.barcode||p.acquink_id||""))}</div>
       <div class="pcard-langs">${codes.map(c=>`<span class="lc">${escHTML(c)}</span>`).join("")}
         ${(p.language_count||0)>4?`<span class="lc">+${p.language_count-4}</span>`:""}</div>
     </div></div>`;
