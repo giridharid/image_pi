@@ -619,7 +619,8 @@ function renderGrid(items) {
     const type = cap(p.product_type || "unknown");
     const codes= pipeList(p.language_codes).slice(0,4);
     const img  = imgUrl(p,"front");
-    const id   = p.barcode || p.acquink_id || "";
+    const bc = (p.barcode && !String(p.barcode).includes("NA") && p.barcode !== "nan") ? p.barcode : "";
+    const id   = bc || p.acquink_id || "";
     const unv  = String(p.barcode_verified) === "false" || p.barcode_verified === false ?
       `<span class="unv-badge" title="Barcode unverified">⚠</span>` : "";
     h += `<div class="pcard" onclick="openDetail('${escAttr(id)}')">`;
@@ -651,6 +652,7 @@ function setFilter(el, type) {
 
 // ── Product detail ─────────────────────────────────────────────────────────
 async function openDetail(id) {
+  if(!id || id.includes("NA") || id === "nan") return;
   showTab("detail", null);
   document.getElementById("detailLayout").innerHTML = loadingHTML();
   try {
