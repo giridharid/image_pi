@@ -233,7 +233,9 @@ body.light .mode-tab:hover{background:rgba(232,85,32,.08)}
 body.light .active-tab{background:linear-gradient(135deg,#e85520,#cc3300)!important;color:#fff!important}
 body.light #productSearch{background:#ffffff;color:var(--text);border:1px solid rgba(200,150,100,.3)}
 body.light #searchDropdown{background:#ffffff;border:1px solid rgba(200,150,100,.3)}
-body.light #chatPanel{position:fixed;right:0;top:0;height:100%;width:44vw;min-width:420px;max-width:700px;background:linear-gradient(180deg,#0e0a1f 0%,#0b0818 100%);border-left:1px solid rgba(168,85,247,.15);z-index:300;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+/* chatPanel always dark regardless of theme - no light override needed, just ensure open state wins */
+body.light #chatPanel{background:linear-gradient(180deg,#0e0a1f 0%,#0b0818 100%);border-left:1px solid rgba(168,85,247,.15)}
+body.light #chatPanel.open{transform:translateX(0)}
 body.light .chat-header{background:#f8f4f0;border-bottom:1px solid rgba(200,150,100,.2)}
 /* chat always dark */
 body.light .msg-user{align-self:flex-end;background:linear-gradient(135deg,#4c1d95,#3730a3);border-radius:14px 14px 3px 14px;padding:10px 15px;max-width:82%;color:var(--text);font-size:12.5px;line-height:1.6;box-shadow:0 2px 12px rgba(124,58,237,.25)}
