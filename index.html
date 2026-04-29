@@ -7,6 +7,7 @@
 <link rel="icon" type="image/png" href="/acquink_logo.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 
@@ -116,9 +117,9 @@ body{background:var(--bg);color:var(--text);min-height:100vh;font-family:'DM San
 /* Context header (same as Hotels) */
 .ctx-header{background:linear-gradient(135deg,rgba(20,26,45,.9),rgba(13,16,32,.95));border:1px solid var(--border2);border-radius:12px;padding:16px 20px;margin-bottom:14px;position:relative}
 .ctx-type{display:inline-block;background:var(--accent);color:#fff;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 9px;border-radius:20px;margin-bottom:6px}
-.ctx-brand{font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.3px;line-height:1.1}
-.ctx-name{color:var(--text3);font-size:12px;margin-top:3px}
-.ctx-bar{font-family:'DM Mono',monospace;font-size:10px;color:var(--text5);margin-top:8px;letter-spacing:1.5px}
+.ctx-brand{font-size:24px;font-weight:700;color:#f0eaff;letter-spacing:-.3px;line-height:1.1}
+.ctx-name{color:rgba(196,181,253,.75);font-size:12px;margin-top:3px}
+.ctx-bar{font-family:'DM Mono',monospace;font-size:10px;color:rgba(196,181,253,.4);margin-top:8px;letter-spacing:1.5px}
 .ctx-conf{position:absolute;top:14px;right:14px;background:rgba(255,107,53,.15);color:var(--accent);font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;border:1px solid var(--border2)}
 
 /* Cards (same as Hotels) */
@@ -792,16 +793,37 @@ function renderDetail(p) {
   left += `<div class="card">
     <div class="card-title">Label Details</div>
     <div class="facts-grid">`;
-  if(p.fssai && String(p.fssai).length>=14) left+=fact("FSSAI",p.fssai,true);
+  if(p.fssai && String(p.fssai).length>=14) {
+    const rawFssai = String(p.fssai).replace(/\D/g,'');
+    if(rawFssai.length === 14) {
+      left += fact("FSSAI", rawFssai, true);
+    } else if(rawFssai.length > 14) {
+      // Multiple numbers stitched — show first 14 with warning
+      left += fact("FSSAI", rawFssai.slice(0,14), true);
+      left += `<div style="font-size:9px;color:var(--accent);background:rgba(255,107,53,.08);padding:4px 7px;border-radius:5px;margin-top:2px">⚠ OCR detected multiple FSSAI numbers — showing first 14 digits only</div>`;
+    }
+  }
   if(p.mrp) left+=fact("MRP","₹"+p.mrp);
   if(p.net_weight) left+=fact("Net weight",p.net_weight);
   if(p.best_before) left+=fact("Best before",p.best_before);
   if(p.country_of_origin) left+=fact("Origin",p.country_of_origin);
-  if(p.color) left+=fact("Color",p.color);
+  // Hide color for food/beverage/spice/pickle/pharma — only meaningful for cosmetics/household/toys
+  const hideColor = ['food','beverage','spice','pickle','pharma'].includes((p.product_type||'').toLowerCase());
+  if(p.color && !hideColor) left+=fact("Color",p.color);
   left += `</div>`;
   if(cert.length) left += `<div style="margin-top:10px">${cert.map(c=>`<span class="cert-tag">${escHTML(c)}</span>`).join("")}</div>`;
   if(unv) left += `<div style="margin-top:8px;font-size:10px;color:var(--accent);background:rgba(255,107,53,.08);padding:5px 8px;border-radius:6px">⚠ Barcode extracted by Vision AI — verify with GS1</div>`;
   left += `</div>`;
+
+  // Visual barcode — only for products with a real numeric barcode
+  const bcNum = (p.barcode||"").replace(/\D/g,"");
+  if(bcNum && bcNum.length >= 8 && !['nan','None'].includes(p.barcode||"")) {
+    left += `<div class="card" style="text-align:center;padding:12px 10px">
+      <div class="card-title" style="text-align:left">Barcode</div>
+      <svg id="barcodesvg" style="max-width:100%;height:auto"></svg>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text4);margin-top:4px;letter-spacing:2px">${escHTML(p.barcode||"")}</div>
+    </div>`;
+  }
 
   // Right column
   let right = `<div class="ctx-header">
@@ -887,6 +909,25 @@ function renderDetail(p) {
 
   document.getElementById("detailLayout").innerHTML =
     `<div class="det-left">${left}</div><div class="det-right">${right}</div>`;
+
+  // Render visual barcode after DOM is ready
+  const bsvg = document.getElementById("barcodesvg");
+  if(bsvg && bcNum) {
+    try {
+      const fmt = bcNum.length === 13 ? "EAN13" : bcNum.length === 8 ? "EAN8" : "CODE128";
+      JsBarcode(bsvg, bcNum, {
+        format: fmt,
+        lineColor: "#c4b5fd",
+        background: "transparent",
+        width: 1.5,
+        height: 50,
+        displayValue: false,
+        margin: 4
+      });
+    } catch(e) {
+      bsvg.parentElement.style.display = "none";
+    }
+  }
 }
 
 function fact(label, value, ok=false) {
