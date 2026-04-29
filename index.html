@@ -845,22 +845,22 @@ function renderDetail(p) {
   if(conf2 < 70) insights.push(`Low extraction confidence (${conf2}%) — label data may need manual review`);
 
   if(insights.length) {
-    right += \`<div class="card">
+    right += `<div class="card">
       <div class="card-title" style="display:flex;align-items:center;gap:6px">
         <span style="color:var(--accent)">&#9670;</span> Product Intelligence
       </div>
-      <div style="display:flex;flex-direction:column;gap:7px">\`;
+      <div style="display:flex;flex-direction:column;gap:7px">`;
     insights.forEach(ins => {
-      right += \`<div style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--text2);line-height:1.5">
+      right += `<div style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--text2);line-height:1.5">
         <span style="color:var(--accent);flex-shrink:0;margin-top:2px;font-size:10px">&#9654;</span>
         <span>\${escHTML(ins)}</span>
-      </div>\`;
+      </div>`;
     });
-    right += \`</div></div>\`;
+    right += `</div></div>`;
   }
 
   if(p.manufacturer_name) {
-    right += \`<div class="card"><div class="card-title">Manufacturer & Contact</div>\`;
+    right += `<div class="card"><div class="card-title">Manufacturer & Contact</div>`;
     right += cr("🏭","Manufacturer",p.manufacturer_name);
     if(p.manufacturer_address) right += cr("📍","Address",p.manufacturer_address);
     if(p.complaint_number)     right += cr("📞","Customer care",p.complaint_number);
