@@ -595,6 +595,27 @@ async function loadProducts(q="", type="") {
   }
 }
 
+function updateStatsFromProducts(items) {
+  // Count products by type from the currently loaded items
+  const counts = {};
+  for (const p of items) {
+    const t = (p.product_type || "unknown").toLowerCase();
+    counts[t] = (counts[t] || 0) + 1;
+  }
+  const setEl = (id, v) => {
+    const e = document.getElementById(id);
+    if (e) e.textContent = v > 0 ? `(${v})` : "";
+  };
+  setEl("cnt-all",       items.length);
+  setEl("cnt-food",      counts.food      || 0);
+  setEl("cnt-beverage",  counts.beverage  || 0);
+  setEl("cnt-spice",     counts.spice     || 0);
+  setEl("cnt-cosmetic",  counts.cosmetic  || 0);
+  setEl("cnt-household", counts.household || 0);
+  setEl("cnt-cleaning",  counts.cleaning  || 0);
+  setEl("cnt-toy",       counts.toy       || 0);
+}
+
 function renderGrid(items) {
   updateStatsFromProducts(items);
   if(!items.length) {
