@@ -22,7 +22,17 @@ def clean_val(v):
     if isinstance(v, float) and (math.isnan(v) or math.isinf(v)): return None
     return v
 
-def clean_row(d): return {k: clean_val(v) for k, v in d.items()}
+def clean_row(d):
+    result = {}
+    for k, v in d.items():
+        cv = clean_val(v)
+        # Strip .0 float suffix from ID fields
+        if k in ('barcode','fssai','acquink_id') and cv is not None:
+            s = str(cv).strip()
+            if s.endswith('.0') and s[:-2].isdigit():
+                cv = s[:-2]
+        result[k] = cv
+    return result
 
 
 app = FastAPI(title="GS1 DataKart Intelligence API", version="1.0")
