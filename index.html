@@ -596,24 +596,32 @@ async function loadProducts(q="", type="") {
 }
 
 function updateStatsFromProducts(items) {
-  // Count products by type from the currently loaded items
-  const counts = {};
-  for (const p of items) {
-    const t = (p.product_type || "unknown").toLowerCase();
-    counts[t] = (counts[t] || 0) + 1;
+  // Update the 4 hero stat cards from the currently loaded items.
+  // Never touch the chip counts (cnt-all, cnt-food, etc.) — those are
+  // set by loadStats() from /api/stats and always reflect the full dataset.
+  const setS = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+
+  if (!items.length) {
+    setS("sTotal", "0");
+    return;
   }
-  const setEl = (id, v) => {
-    const e = document.getElementById(id);
-    if (e) e.textContent = v > 0 ? `(${v})` : "";
-  };
-  setEl("cnt-all",       items.length);
-  setEl("cnt-food",      counts.food      || 0);
-  setEl("cnt-beverage",  counts.beverage  || 0);
-  setEl("cnt-spice",     counts.spice     || 0);
-  setEl("cnt-cosmetic",  counts.cosmetic  || 0);
-  setEl("cnt-household", counts.household || 0);
-  setEl("cnt-cleaning",  counts.cleaning  || 0);
-  setEl("cnt-toy",       counts.toy       || 0);
+
+  setS("sTotal", items.length);
+
+  // Compute brand count, avg languages, avg confidence from loaded items
+  const brands = new Set();
+  let langTotal = 0, langCount = 0, confTotal = 0, confCount = 0;
+  for (const p of items) {
+    if (p.brand && p.brand !== "Unknown") brands.add(p.brand);
+    const lc = parseFloat(p.language_count);
+    if (!isNaN(lc) && lc > 0) { langTotal += lc; langCount++; }
+    const cf = parseFloat(p.confidence);
+    if (!isNaN(cf) && cf > 0) { confTotal += cf; confCount++; }
+  }
+
+  setS("sBrands", brands.size || "—");
+  setS("sLangs",  langCount ? (langTotal / langCount).toFixed(1) : "—");
+  setS("sConf",   confCount ? Math.round(confTotal / confCount * 100) + "%" : "—");
 }
 
 function renderGrid(items) {
