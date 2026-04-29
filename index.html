@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GS1 DataKart | Acquink Intelligence</title>
+<link rel="icon" type="image/png" href="/acquink_logo.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+/* ── Theme variables (same structure as Hotels, orange instead of purple) ── */
+:root{
+  --bg:#0a0c14;
+  --bg2:#0d1020;
+  --bg3:#101828;
+  --bg4:#141e30;
+  --bg5:rgba(18,24,40,.92);
+  --border:rgba(40,60,100,.5);
+  --border2:rgba(255,107,53,.2);
+  --text:#e2e8f0;
+  --text2:#c4cee0;
+  --text3:#8b9bbc;
+  --text4:#5a6b88;
+  --text5:#3a4b68;
+  --accent:#FF6B35;
+  --accent2:#ff8f65;
+  --card-bg:rgba(13,16,32,.7);
+  --card-border:rgba(40,60,100,.3);
+  --input-bg:#090c18;
+  --shadow:rgba(0,0,0,.5);
+}
+body.light{
+  --bg:#f5f4f0;
+  --bg2:#eeecea;
+  --bg3:#e5e3df;
+  --bg4:#ffffff;
+  --bg5:rgba(255,255,255,.98);
+  --border:rgba(200,180,150,.25);
+  --border2:rgba(255,107,53,.3);
+  --text:#1a1510;
+  --text2:#3d3020;
+  --text3:#6b5e45;
+  --text4:#908070;
+  --text5:#b0a090;
+  --accent:#e85520;
+  --accent2:#cc4010;
+  --card-bg:#ffffff;
+  --card-border:rgba(200,180,150,.2);
+  --input-bg:#ffffff;
+  --shadow:rgba(90,60,30,.1);
+}
+
+body{background:var(--bg);color:var(--text);min-height:100vh;font-family:'DM Sans',system-ui,sans-serif;font-size:14px;display:flex;flex-direction:column;transition:background .2s,color .2s}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#0a0c14}
+::-webkit-scrollbar-thumb{background:#1a2540;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#2a3560}
+
+/* ── Topbar ── */
+.topbar{background:var(--bg2);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-sq{width:30px;height:30px;border-radius:7px;flex-shrink:0;object-fit:cover}
+.logo-name{color:var(--accent2);font-weight:700;font-size:15px;letter-spacing:-.2px}
+.logo-sub{color:var(--text3);font-size:11px;letter-spacing:.03em}
+
+/* ── Search ── */
+.search-wrap{position:relative;width:340px}
+#productSearch{width:100%;background:rgba(40,60,100,.4);border:1px solid var(--border2);color:var(--text);padding:7px 14px 7px 36px;border-radius:22px;font-size:12px;outline:none;font-family:inherit;transition:border-color .2s}
+#productSearch:focus{border-color:rgba(255,107,53,.5)}
+#productSearch::placeholder{color:var(--text4)}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text4);font-size:14px;pointer-events:none}
+#searchDropdown{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--bg4);border:1px solid var(--border2);border-radius:10px;z-index:200;display:none;max-height:320px;overflow-y:auto;box-shadow:0 8px 32px var(--shadow)}
+#searchDropdown.show{display:block}
+.search-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border)}
+.search-item:hover{background:rgba(255,107,53,.08)}
+.search-item:last-child{border:none}
+.search-item-name{color:var(--text);font-size:13px;font-weight:500}
+.search-item-meta{color:var(--text3);font-size:11px;margin-top:2px}
+
+/* ── Tabs bar ── */
+.tabs-bar{background:var(--bg3);padding:8px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.tab-group{display:flex;gap:4px}
+.mode-tab{padding:7px 18px;border-radius:8px;font-size:12px;color:var(--text3);cursor:pointer;border:none;background:transparent;transition:all .2s;font-family:inherit;font-weight:500}
+.mode-tab:hover{color:var(--accent2);background:rgba(255,107,53,.08)}
+.mode-tab.active-tab{background:linear-gradient(135deg,#e85520,#cc3300);color:#fff;box-shadow:0 2px 12px rgba(255,107,53,.35)}
+#chatToggle{background:rgba(255,107,53,.12);border:1px solid var(--border2);border-radius:8px;padding:7px 14px;color:var(--accent2);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;font-weight:500;transition:all .2s}
+#chatToggle:hover{background:rgba(255,107,53,.22)}
+#themeToggle{background:rgba(40,60,100,.4);border:1px solid var(--border);border-radius:8px;padding:6px 11px;cursor:pointer;color:var(--text3);font-size:14px;margin-left:6px;transition:all .2s;font-family:inherit;position:relative}
+#themeToggle:hover{background:rgba(255,107,53,.15)}
+#themeToggle:hover::after{content:attr(title);position:absolute;top:calc(100%+6px);right:0;background:var(--bg4);color:var(--text);font-size:11px;padding:4px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;z-index:999;border:1px solid var(--border)}
+
+/* ── Filter row ── */
+.filter-row{background:var(--bg2);padding:9px 20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.fchip{background:rgba(40,60,100,.3);border:1px solid var(--border);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:500;cursor:pointer;color:var(--text3);transition:all .15s;font-family:inherit}
+.fchip:hover{border-color:var(--accent);color:var(--accent)}
+.fchip.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(255,107,53,.35)}
+
+/* ── Main ── */
+.main{padding:16px 20px;flex:1}
+.hidden{display:none!important}
+
+/* ── Stats cards ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:14px 18px;transition:border-color .2s}
+.stat-card:hover{border-color:var(--border2)}
+.stat-lbl{color:var(--text4);font-size:10px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.stat-val{font-size:24px;font-weight:700;letter-spacing:-.5px;color:var(--text)}
+
+/* ── Product grid ── */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.pcard{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .15s,border-color .15s}
+.pcard:hover{transform:translateY(-2px);border-color:var(--border2)}
+.pcard-img{width:100%;height:130px;object-fit:cover;background:var(--bg3);display:block}
+.pcard-ph{width:100%;height:130px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:32px;border-bottom:1px solid var(--border)}
+.pcard-body{padding:10px}
+.pcard-type{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:3px}
+.pcard-brand{font-size:14px;font-weight:600;color:var(--text);line-height:1.2}
+.pcard-name{font-size:11px;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard-langs{display:flex;flex-wrap:wrap;gap:2px;margin-top:6px}
+.lc{background:rgba(255,107,53,.15);color:var(--accent2);font-size:8px;padding:2px 5px;border-radius:3px;font-family:'DM Mono',monospace}
+.unv-badge{font-size:8px;color:var(--accent);margin-left:3px;opacity:.7}
+
+/* ── Product detail view ── */
+.detail-layout{display:grid;grid-template-columns:300px 1fr;gap:0;min-height:calc(100vh - 120px)}
+.det-left{border-right:1px solid var(--border);padding:16px;background:var(--bg2);overflow-y:auto}
+.det-right{padding:20px;overflow-y:auto}
+.back-btn{display:inline-flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;color:var(--text2);margin-bottom:14px;font-family:inherit;transition:all .15s}
+.back-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Product image box */
+.prod-img-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--border);margin-bottom:12px}
+.prod-img{width:100%;max-height:280px;object-fit:contain;background:var(--bg3);display:block}
+.panel-sw{display:flex;border-top:1px solid var(--border)}
+.psw{flex:1;padding:7px;text-align:center;font-size:10px;font-weight:600;color:var(--text3);cursor:pointer;text-transform:uppercase;letter-spacing:.5px;border:none;background:transparent;font-family:inherit;transition:all .15s}
+.psw.active{color:var(--accent);background:rgba(255,107,53,.08)}
+
+/* Context header (same as Hotels) */
+.ctx-header{background:linear-gradient(135deg,rgba(20,26,45,.9),rgba(13,16,32,.95));border:1px solid var(--border2);border-radius:12px;padding:16px 20px;margin-bottom:14px;position:relative}
+.ctx-type{display:inline-block;background:var(--accent);color:#fff;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 9px;border-radius:20px;margin-bottom:6px}
+.ctx-brand{font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.3px;line-height:1.1}
+.ctx-name{color:var(--text3);font-size:12px;margin-top:3px}
+.ctx-bar{font-family:'DM Mono',monospace;font-size:10px;color:var(--text5);margin-top:8px;letter-spacing:1.5px}
+.ctx-conf{position:absolute;top:14px;right:14px;background:rgba(255,107,53,.15);color:var(--accent);font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;border:1px solid var(--border2)}
+
+/* Cards (same as Hotels) */
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.card-title{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+
+/* Facts grid */
+.facts-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fact{background:var(--bg3);border-radius:8px;padding:8px 10px}
+.fact-lbl{font-size:8px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text4);margin-bottom:2px}
+.fact-val{font-size:12px;font-weight:600;color:var(--text);font-family:'DM Mono',monospace}
+.fact-val.ok{color:#4ade80}
+
+/* Nutrition */
+.nutr-table{width:100%;border-collapse:collapse}
+.nutr-table tr{border-bottom:1px solid var(--border)}
+.nutr-table tr:last-child{border-bottom:none}
+.nutr-table td{padding:6px 0;font-size:12px;color:var(--text2)}
+.nutr-table td:last-child{text-align:right;font-family:'DM Mono',monospace;font-weight:500;color:var(--text)}
+.nutr-table tr.hl td{font-weight:700;color:var(--text)}
+
+/* Ingredients */
+.ing-wrap{display:flex;flex-wrap:wrap;gap:4px}
+.ing-tag{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px 9px;font-size:11px;color:var(--text2)}
+
+/* Languages */
+.lang-wrap{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.lang-chip{background:rgba(255,107,53,.12);color:var(--accent2);border-radius:5px;padding:3px 8px;font-size:11px;font-weight:500}
+.lang-code{font-family:'DM Mono',monospace;font-size:9px;opacity:.55;margin-left:3px}
+.region-chip{background:rgba(74,122,219,.1);color:#6899e0;border-radius:5px;padding:3px 8px;font-size:11px;font-weight:500;font-family:'DM Mono',monospace}
+
+/* Contact rows */
+.contact-row{display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.contact-row:last-child{border-bottom:none}
+.ci{width:28px;height:28px;background:var(--bg3);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px}
+.cl{font-size:8px;color:var(--text4);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+.cv{font-family:'DM Mono',monospace;font-size:11px;color:var(--text);word-break:break-all}
+.cert-tag{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;color:var(--accent2);display:inline-block;margin:2px}
+
+/* ── Region map ── */
+.map-wrap{display:grid;grid-template-columns:1fr 280px;gap:16px;margin-top:4px}
+.map-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:16px}
+#indiaMap{width:100%;height:auto}
+.map-legend{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:11px;color:var(--text3)}
+.leg-grad{width:100px;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--bg3),var(--accent))}
+.region-list-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.rl-header{padding:12px 14px;border-bottom:1px solid var(--border);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
+.rl-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .1s}
+.rl-item:last-child{border-bottom:none}
+.rl-item:hover{background:rgba(255,107,53,.06)}
+.rl-name{font-size:12px;font-weight:500;color:var(--text)}
+.rl-cnt{background:var(--accent);color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+
+/* ── Chat panel (same fixed right panel as Hotels) ── */
+#chatPanel{position:fixed;right:0;top:0;height:100%;width:44vw;min-width:420px;max-width:700px;background:linear-gradient(180deg,#0e1220 0%,#0a0e1c 100%);border-left:1px solid var(--border2);z-index:300;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+#chatPanel.open{transform:translateX(0)}
+.chat-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:rgba(10,14,28,.6)}
+.chat-title{color:var(--accent2);font-size:14px;font-weight:700;letter-spacing:-.1px}
+#chatContextLabel{color:var(--text4);font-size:11px;margin-top:2px}
+.chat-hdr-btns{display:flex;gap:6px}
+.chat-hdr-btn{background:rgba(40,60,100,.4);border:none;color:var(--text3);cursor:pointer;font-size:13px;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.chat-hdr-btn:hover{background:rgba(255,107,53,.2);color:var(--accent2)}
+#chatMessages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.msg-user{align-self:flex-end;background:linear-gradient(135deg,#7c2a10,#993300);border-radius:14px 14px 3px 14px;padding:10px 15px;max-width:82%;color:var(--text);font-size:12.5px;line-height:1.6;box-shadow:0 2px 12px rgba(255,107,53,.2)}
+.msg-bot{align-self:flex-start;background:var(--bg4);border:1px solid var(--border);border-radius:14px 14px 14px 3px;padding:12px 16px;max-width:92%;color:var(--text2);font-size:12.5px;line-height:1.7}
+.msg-bot strong{color:var(--accent2);font-weight:600}
+.msg-bot h3{color:var(--accent);font-size:13px;font-weight:700;margin:10px 0 5px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.msg-bot h4{color:var(--text3);font-size:12px;font-weight:600;margin:8px 0 3px}
+.msg-bot ul{margin:5px 0 8px 14px}
+.msg-bot li{margin-bottom:3px;color:var(--text2)}
+.msg-bot li::marker{color:var(--accent)}
+.msg-bot p{margin-bottom:6px}
+.msg-bot code{background:var(--bg3);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:11.5px;color:#86efac;font-family:'DM Mono',monospace}
+.msg-bot hr{border:none;border-top:1px solid var(--border);margin:8px 0}
+.typing{display:flex;gap:4px;padding:4px 0}
+.typing span{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:bounce 1.4s infinite ease-in-out both}
+.typing span:nth-child(2){animation-delay:-.16s}
+.typing span:nth-child(3){animation-delay:0s}
+@keyframes bounce{0%,80%,100%{transform:scale(0);opacity:.3}40%{transform:scale(1);opacity:1}}
+.chat-input-row{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;background:rgba(8,10,20,.5)}
+#chatInput{flex:1;background:var(--bg4);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:10px;font-size:12.5px;outline:none;font-family:inherit;transition:border-color .2s}
+#chatInput:focus{border-color:rgba(255,107,53,.4)}
+#chatInput::placeholder{color:var(--text5)}
+#chatSend{background:linear-gradient(135deg,#e85520,#cc3300);border:none;color:#fff;padding:10px 16px;border-radius:10px;cursor:pointer;font-size:15px;transition:opacity .2s}
+#chatSend:hover{opacity:.85}
+#chatOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:290}
+#chatOverlay.show{display:block}
+.chat-suggestions{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.chat-sug{background:rgba(40,60,100,.3);border:1px solid var(--border2);color:var(--text3);padding:4px 11px;border-radius:20px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .2s}
+.chat-sug:hover{background:rgba(255,107,53,.15);color:var(--accent2);border-color:var(--border2)}
+
+/* Loader */
+#loader{display:none;position:fixed;inset:0;background:rgba(8,10,20,.7);z-index:400;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+#loader.show{display:flex}
+.loader-spin{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Footer */
+.footer{background:var(--bg);padding:10px 20px;display:flex;justify-content:space-between;font-size:11px;color:var(--text4);border-top:1px solid var(--border);margin-top:8px;font-family:'DM Mono',monospace}
+.footer .masi{color:var(--accent)}
+
+/* Light mode overrides */
+body.light .topbar{background:#ffffff;border-bottom:1px solid rgba(200,150,100,.25);box-shadow:0 2px 12px rgba(150,80,30,.08)}
+body.light .tabs-bar{background:#f8f4f0;border-bottom:1px solid rgba(200,150,100,.2)}
+body.light .filter-row{background:#f0ece8;border-bottom:1px solid rgba(200,150,100,.2)}
+body.light .card{background:#ffffff;border:1px solid rgba(200,180,150,.25)}
+body.light .stat-card{background:#ffffff;border:1px solid rgba(200,180,150,.25)}
+body.light .pcard{background:#ffffff;border:1px solid rgba(200,180,150,.2)}
+body.light .mode-tab{color:var(--text3)}
+body.light .mode-tab:hover{background:rgba(232,85,32,.08)}
+body.light .active-tab{background:linear-gradient(135deg,#e85520,#cc3300)!important;color:#fff!important}
+body.light #productSearch{background:#ffffff;color:var(--text);border:1px solid rgba(200,150,100,.3)}
+body.light #searchDropdown{background:#ffffff;border:1px solid rgba(200,150,100,.3)}
+body.light #chatPanel{background:#ffffff;border-left:1px solid rgba(200,150,100,.25);box-shadow:-8px 0 32px rgba(150,80,30,.1)}
+body.light .chat-header{background:#f8f4f0;border-bottom:1px solid rgba(200,150,100,.2)}
+body.light .msg-bot{background:#f5f0ec;border:1px solid rgba(200,150,100,.2);color:var(--text)}
+body.light .msg-user{background:linear-gradient(135deg,#cc4010,#aa2800)}
+body.light #chatInput{background:#ffffff;color:var(--text);border:1px solid rgba(200,150,100,.3)}
+body.light .det-left{background:var(--bg2)}
+
+/* Responsive */
+@media(max-width:900px){
+  .detail-layout{grid-template-columns:1fr}
+  .map-wrap{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  #chatPanel{width:100%;min-width:0;max-width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- Loader -->
+<div id="loader"><div class="loader-spin"></div></div>
+
+<!-- Chat overlay -->
+<div id="chatOverlay" onclick="closeChat()"></div>
+
+<!-- Chat panel (same fixed-right structure as Hotels) -->
+<div id="chatPanel">
+  <div class="chat-header">
+    <div>
+      <div class="chat-title">💬 SmaartAnalyst</div>
+      <div id="chatContextLabel">GS1 DataKart Intelligence Agent</div>
+    </div>
+    <div class="chat-hdr-btns">
+      <button class="chat-hdr-btn" onclick="clearChat()" title="Clear">⊘</button>
+      <button class="chat-hdr-btn" onclick="closeChat()" title="Close">✕</button>
+    </div>
+  </div>
+  <div id="chatMessages">
+    <div class="msg-bot">
+      Hi! I'm <strong>SmaartAnalyst</strong> — your GS1 DataKart intelligence AI.
+      Select a product from the dashboard, then ask me about nutrition, ingredients, regional reach,
+      compliance, or anything in the dataset. I can also query across all 128 products.
+      <div class="chat-suggestions" id="chatSuggestions"></div>
+    </div>
+  </div>
+  <div class="chat-input-row">
+    <input id="chatInput" placeholder="Ask about the dataset or a product..." autocomplete="off"/>
+    <button id="chatSend" onclick="sendChat()">→</button>
+  </div>
+</div>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="logo">
+    <img src="/acquink_logo.png" class="logo-sq" onerror="this.style.display='none'"/>
+    <div><div class="logo-name">GS1 DataKart</div><div class="logo-sub">Product Label Intelligence · Acquink</div></div>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input id="productSearch" placeholder="Search brand, product, barcode..." autocomplete="off"/>
+    <div id="searchDropdown"></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <button id="chatToggle" onclick="openChat()">💬 SmaartAnalyst</button>
+    <button id="themeToggle" title="Toggle light/dark" onclick="toggleTheme()">◐</button>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs-bar">
+  <div class="tab-group">
+    <button class="mode-tab active-tab" onclick="showTab('products',this)">Products</button>
+    <button class="mode-tab" onclick="showTab('region',this)">Region Map</button>
+  </div>
+</div>
+
+<!-- Filter row -->
+<div class="filter-row" id="filterRow">
+  <div class="fchip on" onclick="setFilter(this,'')">All</div>
+  <div class="fchip" onclick="setFilter(this,'food')">Food</div>
+  <div class="fchip" onclick="setFilter(this,'spice')">Spice</div>
+  <div class="fchip" onclick="setFilter(this,'cosmetic')">Cosmetic</div>
+  <div class="fchip" onclick="setFilter(this,'household')">Household</div>
+  <div class="fchip" onclick="setFilter(this,'cleaning')">Cleaning</div>
+  <div class="fchip" onclick="setFilter(this,'toy')">Toy</div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- PRODUCTS TAB -->
+  <div id="tab-products">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-lbl">Products</div><div class="stat-val" id="sTotal">—</div></div>
+      <div class="stat-card"><div class="stat-lbl">Brands</div><div class="stat-val" id="sBrands">—</div></div>
+      <div class="stat-card"><div class="stat-lbl">Avg Scripts</div><div class="stat-val" id="sLangs">—</div></div>
+      <div class="stat-card"><div class="stat-lbl">Accuracy</div><div class="stat-val" id="sConf">—</div></div>
+    </div>
+    <div class="pgrid" id="productGrid"></div>
+  </div>
+
+  <!-- DETAIL VIEW (overlaid same tab) -->
+  <div id="tab-detail" class="hidden">
+    <div class="detail-layout" id="detailLayout"></div>
+  </div>
+
+  <!-- REGION TAB -->
+  <div id="tab-region" class="hidden">
+    <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px">India Region Intelligence</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Product distribution by target state. Darker = more products. Click any state to filter.</div>
+    <div class="map-wrap">
+      <div class="map-card">
+        <svg id="indiaMap" viewBox="0 0 600 650" xmlns="http://www.w3.org/2000/svg">
+          <g id="mapStates" stroke="var(--bg2)" stroke-width="0.8" cursor="pointer">
+            <path id="IN-JK" d="M160,30 L200,20 L240,35 L260,60 L240,90 L200,100 L170,80 L150,60 Z"/>
+            <path id="IN-HP" d="M200,100 L240,90 L260,110 L250,140 L220,150 L195,130 Z"/>
+            <path id="IN-PB" d="M155,100 L200,100 L195,130 L175,145 L145,130 L140,110 Z"/>
+            <path id="IN-HR" d="M175,145 L220,150 L225,175 L200,185 L170,175 L160,160 Z"/>
+            <path id="IN-DL" d="M200,175 L215,170 L220,185 L205,192 L195,185 Z"/>
+            <path id="IN-UK" d="M220,150 L260,110 L290,130 L285,160 L255,170 L225,175 Z"/>
+            <path id="IN-UP" d="M170,175 L200,185 L225,175 L255,170 L290,180 L320,200 L310,240 L280,260 L240,265 L200,255 L175,235 L160,210 L165,190 Z"/>
+            <path id="IN-RJ" d="M80,145 L140,110 L145,130 L175,145 L160,160 L165,190 L160,210 L130,230 L95,225 L65,200 L55,170 L70,150 Z"/>
+            <path id="IN-GJ" d="M50,200 L65,200 L95,225 L100,255 L80,280 L55,295 L30,275 L25,240 L35,215 Z"/>
+            <path id="IN-MP" d="M130,230 L160,210 L175,235 L200,255 L240,265 L265,270 L270,300 L240,320 L200,325 L165,310 L135,295 L110,270 L110,245 Z"/>
+            <path id="IN-BR" d="M280,260 L310,240 L345,250 L360,275 L340,295 L310,300 L285,290 Z"/>
+            <path id="IN-JH" d="M285,290 L310,300 L340,295 L355,315 L340,340 L310,350 L280,335 L270,315 Z"/>
+            <path id="IN-WB" d="M340,295 L360,275 L390,280 L400,310 L385,340 L360,360 L340,345 L355,315 Z"/>
+            <path id="IN-MH" d="M80,280 L100,255 L135,295 L165,310 L200,325 L215,355 L195,390 L165,400 L130,385 L95,360 L70,325 L65,300 Z"/>
+            <path id="IN-CG" d="M240,320 L270,300 L270,315 L280,335 L310,350 L315,375 L290,395 L260,395 L240,375 L235,350 Z"/>
+            <path id="IN-OR" d="M310,350 L340,345 L360,360 L370,385 L355,410 L325,420 L295,410 L290,395 L315,375 Z"/>
+            <path id="IN-GA" d="M100,390 L115,385 L120,400 L108,410 L98,403 Z"/>
+            <path id="IN-KA" d="M95,360 L130,385 L165,400 L195,390 L215,415 L205,450 L175,470 L140,465 L110,445 L85,415 L80,385 Z"/>
+            <path id="IN-AP" d="M215,355 L240,375 L260,395 L295,410 L325,420 L330,450 L300,470 L265,475 L230,465 L205,450 L215,415 Z"/>
+            <path id="IN-TG" d="M215,415 L230,465 L265,475 L260,395 L240,375 L235,350 Z"/>
+            <path id="IN-TN" d="M140,465 L175,470 L205,450 L230,465 L235,500 L215,535 L190,555 L165,545 L145,515 L130,490 Z"/>
+            <path id="IN-KL" d="M130,490 L145,515 L165,545 L155,570 L135,575 L115,555 L108,525 L112,500 Z"/>
+            <path id="IN-PY" d="M210,522 L218,518 L220,528 L212,532 Z"/>
+            <path id="IN-AS" d="M400,200 L435,195 L455,210 L450,235 L420,245 L395,235 L390,215 Z"/>
+            <path id="IN-TR" d="M400,310 L415,300 L425,315 L415,330 L400,325 Z"/>
+            <path id="IN-MN" d="M450,235 L470,230 L478,248 L465,262 L445,258 L440,245 Z"/>
+            <path id="IN-ML" d="M390,235 L420,245 L425,260 L400,268 L383,258 Z"/>
+            <path id="IN-NL" d="M455,210 L478,205 L485,222 L470,230 L450,235 L455,218 Z"/>
+            <path id="IN-MZ" d="M415,330 L430,325 L438,342 L425,355 L408,345 Z"/>
+            <path id="IN-AR" d="M435,195 L480,175 L510,190 L505,215 L478,205 L455,210 L435,195 Z"/>
+            <path id="IN-SK" d="M385,195 L398,188 L405,200 L395,208 L382,205 Z"/>
+          </g>
+          <g font-size="7" fill="var(--text4)" text-anchor="middle" font-family="DM Sans,sans-serif">
+            <text x="200" y="62">J&amp;K</text><text x="153" y="118">PB</text>
+            <text x="234" y="132">HP</text><text x="190" y="165">HR</text>
+            <text x="207" y="184">DL</text><text x="254" y="153">UK</text>
+            <text x="237" y="222">UP</text><text x="107" y="182">RJ</text>
+            <text x="62" y="246">GJ</text><text x="188" y="280">MP</text>
+            <text x="316" y="270">BR</text><text x="307" y="322">JH</text>
+            <text x="365" y="315">WB</text><text x="137" y="335">MH</text>
+            <text x="270" y="354">CG</text><text x="328" y="388">OR</text>
+            <text x="107" y="400">GA</text><text x="147" y="420">KA</text>
+            <text x="268" y="433">AP</text><text x="247" y="440">TG</text>
+            <text x="182" y="512">TN</text><text x="126" y="536">KL</text>
+            <text x="428" y="220">AS</text><text x="410" y="315">TR</text>
+            <text x="458" y="250">MN</text><text x="403" y="256">ML</text>
+          </g>
+        </svg>
+        <div class="map-legend">
+          <span>0</span><div class="leg-grad"></div><span>Most products</span>
+        </div>
+      </div>
+      <div class="region-list-card">
+        <div class="rl-header">States by product count</div>
+        <div id="regionList"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- main -->
+
+<div class="footer">
+  <span>GS1 DataKart · <span class="masi">MASI</span> powered by Acquink Solutions</span>
+  <span>gen-lang-client-0143536012.gs1_datakart.products</span>
+</div>
+
+<script>
+const GCS  = "https://storage.googleapis.com/gs1-datakart-images";
+const EMOJI= {food:"🍱",pickle:"🫙",spice:"🌶",beverage:"🥤",cosmetic:"💄",
+              pharma:"💊",medical_device:"🩺",incense:"🕯",household:"🏠",
+              cleaning:"🧹",toy:"🎲",stationery:"✏️",unknown:"📦"};
+const HL   = new Set(["Energy","Protein","Total Carbohydrate","Total Fat","Sodium"]);
+
+let filterType    = "";
+let currentProd   = null;
+let convId        = null;
+let acTimer       = null;
+let regionLoaded  = false;
+let suggestionsLoaded = false;
+
+// ── Theme ─────────────────────────────────────────────────────────────────
+const saved = localStorage.getItem("gs1-theme") || "dark";
+if(saved === "light") document.body.classList.add("light");
+function toggleTheme() {
+  document.body.classList.toggle("light");
+  localStorage.setItem("gs1-theme", document.body.classList.contains("light") ? "light" : "dark");
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+function showTab(name, el) {
+  ["products","detail","region"].forEach(t => {
+    document.getElementById("tab-"+t).classList.add("hidden");
+  });
+  document.getElementById("tab-"+name).classList.remove("hidden");
+  document.querySelectorAll(".mode-tab").forEach(b => b.classList.remove("active-tab"));
+  if(el) el.classList.add("active-tab");
+  document.getElementById("filterRow").style.display = name === "products" ? "" : "none";
+  if(name === "region") initRegionMap();
+}
+
+// ── Chat ──────────────────────────────────────────────────────────────────
+function openChat() {
+  document.body.style.overflow = "hidden";
+  document.getElementById("chatPanel").classList.add("open");
+  document.getElementById("chatOverlay").classList.add("show");
+  updateChatContext();
+  if(!suggestionsLoaded) loadSuggestions();
+}
+function closeChat() {
+  document.body.style.overflow = "";
+  document.getElementById("chatPanel").classList.remove("open");
+  document.getElementById("chatOverlay").classList.remove("show");
+}
+function updateChatContext() {
+  const lbl = document.getElementById("chatContextLabel");
+  if(currentProd) {
+    lbl.textContent = `Context: ${currentProd.brand || ""} ${currentProd.product_name || ""}`;
+  } else {
+    lbl.textContent = "Context: All 128 products";
+  }
+}
+function clearChat() {
+  const msgs = document.getElementById("chatMessages");
+  msgs.innerHTML = `<div class="msg-bot">
+    Chat cleared. Ask me anything about the GS1 DataKart dataset.
+    <div class="chat-suggestions" id="chatSuggestions"></div>
+  </div>`;
+  convId = null;
+  loadSuggestions();
+}
+
+async function loadSuggestions() {
+  try {
+    const sugs = await fetchJSON("/api/suggestions");
+    const el   = document.getElementById("chatSuggestions");
+    if(el) el.innerHTML = sugs.slice(0,4).map(s =>
+      `<span class="chat-sug" onclick="askSug('${s.replace(/'/g,"\\'")}')">↗ ${s}</span>`
+    ).join("");
+    suggestionsLoaded = true;
+  } catch(e) {}
+}
+
+function askSug(q) {
+  document.getElementById("chatInput").value = q;
+  sendChat();
+}
+
+async function sendChat() {
+  const input = document.getElementById("chatInput");
+  const q     = input.value.trim();
+  if(!q) return;
+  input.value = "";
+  input.disabled = true;
+  document.getElementById("chatSend").disabled = true;
+
+  const msgs = document.getElementById("chatMessages");
+  msgs.innerHTML += `<div class="msg-user">${escHTML(q)}</div>`;
+
+  const tid = "t"+Date.now();
+  msgs.innerHTML += `<div id="${tid}" class="msg-bot"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+
+  try {
+    const pid = currentProd ? (currentProd.barcode || currentProd.acquink_id) : null;
+    const res = await fetch("/api/chat", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({message:q, product_id:pid, conversation_id:convId})
+    });
+    const d = await res.json();
+    convId   = d.conversation_id;
+    const html = typeof marked !== "undefined" ?
+      marked.parse(d.response || "No response") :
+      (d.response || "No response").replace(/\n/g,"<br>");
+    document.getElementById(tid).innerHTML = html;
+  } catch(e) {
+    document.getElementById(tid).textContent = "Could not reach agent. Check server.";
+  }
+
+  msgs.scrollTop = msgs.scrollHeight;
+  input.disabled = false;
+  document.getElementById("chatSend").disabled = false;
+  input.focus();
+}
+
+document.getElementById("chatInput").addEventListener("keydown", e => {
+  if(e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); }
+});
+
+// ── Stats ─────────────────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const d = await fetchJSON("/api/stats");
+    document.getElementById("sTotal").textContent  = d.total_products ?? "—";
+    document.getElementById("sBrands").textContent = d.unique_brands  ?? "—";
+    document.getElementById("sLangs").textContent  = d.avg_languages  ?? "—";
+    document.getElementById("sConf").textContent   = d.avg_confidence ? d.avg_confidence+"%" : "—";
+  } catch(e) {}
+}
+
+// ── Products ──────────────────────────────────────────────────────────────
+async function loadProducts(q="", type="") {
+  document.getElementById("productGrid").innerHTML = loadingHTML();
+  try {
+    let url = `/api/search?limit=64`;
+    if(q)    url += `&q=${encodeURIComponent(q)}`;
+    if(type) url += `&product_type=${type}`;
+    const data = await fetchJSON(url);
+    renderGrid(Array.isArray(data) ? data : []);
+  } catch(e) {
+    document.getElementById("productGrid").innerHTML = `<div style="color:var(--text3);padding:20px">Error loading products</div>`;
+  }
+}
+
+function renderGrid(items) {
+  if(!items.length) {
+    document.getElementById("productGrid").innerHTML =
+      `<div style="color:var(--text3);padding:20px;text-align:center">No products found</div>`;
+    return;
+  }
+  let h = "";
+  for(const p of items) {
+    const em   = EMOJI[p.product_type] || "📦";
+    const type = cap(p.product_type || "unknown");
+    const codes= pipeList(p.language_codes).slice(0,4);
+    const img  = imgUrl(p,"front");
+    const id   = p.barcode || p.acquink_id || "";
+    const unv  = String(p.barcode_verified) === "false" || p.barcode_verified === false ?
+      `<span class="unv-badge" title="Barcode unverified">⚠</span>` : "";
+    h += `<div class="pcard" onclick="openDetail('${escAttr(id)}')">`;
+    if(img) {
+      h += `<img class="pcard-img" src="${img}"
+        onerror="this.outerHTML='<div class=\\'pcard-ph\\'>${em}</div>'"
+        loading="lazy" alt="${escAttr(p.brand||'')}"/>`;
+    } else {
+      h += `<div class="pcard-ph">${em}</div>`;
+    }
+    h += `<div class="pcard-body">
+      <div class="pcard-type">${type}</div>
+      <div class="pcard-brand">${escHTML(p.brand||"Unknown")}${unv}</div>
+      <div class="pcard-name">${escHTML(p.product_name||"")}</div>
+      <div class="pcard-langs">${codes.map(c=>`<span class="lc">${escHTML(c)}</span>`).join("")}
+        ${(p.language_count||0)>4?`<span class="lc">+${p.language_count-4}</span>`:""}</div>
+    </div></div>`;
+  }
+  document.getElementById("productGrid").innerHTML = h;
+}
+
+function setFilter(el, type) {
+  filterType = type;
+  document.querySelectorAll(".fchip").forEach(c => c.classList.remove("on"));
+  el.classList.add("on");
+  loadProducts("", type);
+}
+
+// ── Product detail ─────────────────────────────────────────────────────────
+async function openDetail(id) {
+  showTab("detail", null);
+  document.getElementById("detailLayout").innerHTML = loadingHTML();
+  try {
+    const p = await fetchJSON(`/api/product/${encodeURIComponent(id)}`);
+    currentProd = p;
+    renderDetail(p);
+    if(document.getElementById("chatPanel").classList.contains("open"))
+      updateChatContext();
+  } catch(e) {
+    document.getElementById("detailLayout").innerHTML =
+      `<div style="padding:20px;color:var(--text3)">Product not found</div>`;
+  }
+}
+
+function imgUrl(p, panel) {
+  if(!p) return null;
+  if(panel==="front" && p.front_image) return `${GCS}/${p.front_image}`;
+  if(panel==="back"  && p.back_image)  return `${GCS}/${p.back_image}`;
+  if(p.product_image) return `${GCS}/${p.product_image}`;
+  const files = pipeList(p.image_files);
+  return files.length ? `${GCS}/${files[0]}` : null;
+}
+
+function renderDetail(p) {
+  const conf  = Math.round((p.confidence||0)*100);
+  const type  = cap(p.product_type||"unknown");
+  const em    = EMOJI[p.product_type]||"📦";
+  const fImg  = imgUrl(p,"front");
+  const bImg  = imgUrl(p,"back");
+  const unv   = String(p.barcode_verified)==="false" || p.barcode_verified===false;
+  const langs = p.languages || [];
+  const codes = p.language_codes || [];
+  const regs  = p.regions || [];
+  const nutr  = p.nutrition || {};
+  const ing   = p.ingredients || [];
+  const cert  = p.certifications || [];
+
+  // Left column
+  let left = `<button class="back-btn" onclick="backToGrid()">← Products</button>`;
+  left += `<div class="prod-img-wrap">`;
+  if(fImg) {
+    left += `<img class="prod-img" id="pImg" src="${fImg}"
+      onerror="this.outerHTML='<div style=\\'height:250px;display:flex;align-items:center;justify-content:center;font-size:48px;background:var(--bg3)\\'>${em}</div>'"
+      alt="${escAttr(p.brand||'')}"/>`;
+  } else {
+    left += `<div style="height:250px;display:flex;align-items:center;justify-content:center;font-size:48px;background:var(--bg3)">${em}</div>`;
+  }
+  if(fImg||bImg) {
+    left += `<div class="panel-sw">
+      ${fImg?`<button class="psw active" id="bFront" onclick="swPanel('front')">Front</button>`:""}
+      ${bImg?`<button class="psw" id="bBack" onclick="swPanel('back')">Back</button>`:""}
+    </div>`;
+  }
+  left += `</div>`;
+
+  // Facts
+  left += `<div class="card">
+    <div class="card-title">Label Details</div>
+    <div class="facts-grid">`;
+  if(p.fssai && String(p.fssai).length>=14) left+=fact("FSSAI",p.fssai,true);
+  if(p.mrp) left+=fact("MRP","₹"+p.mrp);
+  if(p.net_weight) left+=fact("Net weight",p.net_weight);
+  if(p.best_before) left+=fact("Best before",p.best_before);
+  if(p.country_of_origin) left+=fact("Origin",p.country_of_origin);
+  if(p.color) left+=fact("Color",p.color);
+  left += `</div>`;
+  if(cert.length) left += `<div style="margin-top:10px">${cert.map(c=>`<span class="cert-tag">${escHTML(c)}</span>`).join("")}</div>`;
+  if(unv) left += `<div style="margin-top:8px;font-size:10px;color:var(--accent);background:rgba(255,107,53,.08);padding:5px 8px;border-radius:6px">⚠ Barcode extracted by Vision AI — verify with GS1</div>`;
+  left += `</div>`;
+
+  // Right column
+  let right = `<div class="ctx-header">
+    <div class="ctx-conf">${conf}% confidence</div>
+    <div class="ctx-type">${type}</div>
+    <div class="ctx-brand">${escHTML(p.brand||"Unknown Brand")}</div>
+    <div class="ctx-name">${escHTML(p.product_name||"")}</div>
+    <div class="ctx-bar">${escHTML(p.barcode||p.acquink_id||"")}</div>
+  </div>`;
+
+  // Nutrition
+  if(Object.keys(nutr).length) {
+    right += `<div class="card"><div class="card-title">Nutrition (per 100g)</div>
+    <table class="nutr-table">`;
+    for(const [nm,nv] of Object.entries(nutr))
+      right += `<tr class="${HL.has(nm)?"hl":""}"><td>${escHTML(nm)}</td>
+        <td>${nv.value} ${escHTML(nv.unit||"g")}</td></tr>`;
+    right += `</table></div>`;
+  }
+
+  // Ingredients
+  if(ing.length) {
+    right += `<div class="card"><div class="card-title">Ingredients (${ing.length})</div>
+    <div class="ing-wrap">${ing.map(i=>`<span class="ing-tag">${escHTML(i)}</span>`).join("")}</div></div>`;
+  }
+
+  // Languages & Regions
+  if(langs.length) {
+    right += `<div class="card"><div class="card-title">Label Languages → Target Regions</div>
+    <div class="lang-wrap">${langs.map((l,i)=>`<span class="lang-chip">${escHTML(l)}${codes[i]?`<span class="lang-code">${codes[i]}</span>`:""}</span>`).join("")}</div>
+    <div class="lang-wrap">${regs.slice(0,12).map(r=>`<span class="region-chip">${escHTML(r)}</span>`).join("")}</div>
+    </div>`;
+  }
+
+  // Manufacturer
+  if(p.manufacturer_name) {
+    right += `<div class="card"><div class="card-title">Manufacturer & Contact</div>`;
+    right += cr("🏭","Manufacturer",p.manufacturer_name);
+    if(p.manufacturer_address) right += cr("📍","Address",p.manufacturer_address);
+    if(p.complaint_number)     right += cr("📞","Customer care",p.complaint_number);
+    if(p.complaint_email)      right += cr("✉️","Email",p.complaint_email);
+    if(p.website)              right += cr("🌐","Website",p.website);
+    right += `</div>`;
+  }
+
+  if(p.product_description && !p.brand) {
+    right += `<div class="card"><div class="card-title">Visual Description</div>
+    <div style="font-size:12px;color:var(--text3)">${escHTML(p.product_description)}</div></div>`;
+  }
+
+  if(p.storage) {
+    right += `<div class="card"><div class="card-title">Storage</div>
+    <div style="font-size:12px;color:var(--text3)">${escHTML(p.storage)}</div></div>`;
+  }
+
+  right += `<div style="text-align:center;padding:12px;font-size:10px;color:var(--text4)">
+    Intelligence by <span style="color:var(--accent)">Acquink Solutions</span> ·
+    Verified by <span style="color:var(--accent)">GS1 India DataKart</span></div>`;
+
+  document.getElementById("detailLayout").innerHTML =
+    `<div class="det-left">${left}</div><div class="det-right">${right}</div>`;
+}
+
+function fact(label, value, ok=false) {
+  return `<div class="fact"><div class="fact-lbl">${label}</div>
+    <div class="fact-val${ok?" ok":""}">${escHTML(String(value))}</div></div>`;
+}
+function cr(icon, label, value) {
+  return `<div class="contact-row"><div class="ci">${icon}</div>
+    <div><div class="cl">${label}</div><div class="cv">${escHTML(String(value))}</div></div></div>`;
+}
+function swPanel(panel) {
+  if(!currentProd) return;
+  const img = document.getElementById("pImg");
+  if(!img) return;
+  const url = imgUrl(currentProd, panel);
+  if(url) img.src = url;
+  document.querySelectorAll(".psw").forEach(b => b.classList.remove("active"));
+  const btn = panel==="front" ? document.getElementById("bFront") : document.getElementById("bBack");
+  if(btn) btn.classList.add("active");
+}
+function backToGrid() {
+  currentProd = null;
+  showTab("products", document.querySelectorAll(".mode-tab")[0]);
+}
+
+// ── Autocomplete ────────────────────────────────────────────────────────────
+document.getElementById("productSearch").addEventListener("input", function() {
+  clearTimeout(acTimer);
+  const q = this.value.trim();
+  if(q.length < 2) { closeAc(); return; }
+  acTimer = setTimeout(() => fetchAc(q), 200);
+});
+document.getElementById("productSearch").addEventListener("keydown", e => {
+  if(e.key === "Enter") { closeAc(); doSearch(); }
+  if(e.key === "Escape") closeAc();
+});
+document.addEventListener("click", e => {
+  if(!e.target.closest(".search-wrap")) closeAc();
+});
+
+async function fetchAc(q) {
+  try {
+    const data = await fetchJSON(`/api/autocomplete?q=${encodeURIComponent(q)}`);
+    const box  = document.getElementById("searchDropdown");
+    if(!data.length) { closeAc(); return; }
+    box.innerHTML = data.map(d => `
+      <div class="search-item" onclick="openDetail('${escAttr(d.barcode||"")}')">
+        <div class="search-item-name">${escHTML(d.label)}</div>
+        <div class="search-item-meta">${escHTML(d.product_type||"")} · ${escHTML(d.barcode||"")}</div>
+      </div>`).join("");
+    box.classList.add("show");
+  } catch(e) {}
+}
+function closeAc() { document.getElementById("searchDropdown").classList.remove("show"); }
+
+function doSearch() {
+  const q = document.getElementById("productSearch").value.trim();
+  if(!q) return;
+  showTab("products", document.querySelectorAll(".mode-tab")[0]);
+  loadProducts(q, "");
+  document.querySelectorAll(".fchip").forEach(c => c.classList.remove("on"));
+  document.querySelectorAll(".fchip")[0].classList.add("on");
+  filterType = "";
+}
+
+// ── Region map ──────────────────────────────────────────────────────────────
+async function initRegionMap() {
+  if(regionLoaded) return;
+  try {
+    const rows = await fetchJSON("/api/regions");
+    const max  = Math.max(...rows.map(r => r.product_count||0), 1);
+    rows.forEach(r => {
+      const el = document.getElementById(r.region_code || "");
+      if(el) {
+        const alpha = 0.12 + (r.product_count/max)*0.88;
+        el.style.fill = `rgba(255,107,53,${alpha})`;
+        el.addEventListener("click", () => filterByRegion(r.region, r.region_code));
+        el.addEventListener("mouseenter", e => showTooltip(e, `${r.region}: ${r.product_count}`));
+        el.addEventListener("mouseleave", hideTooltip);
+      }
+    });
+    let listH = "";
+    rows.slice(0,20).forEach(r => {
+      listH += `<div class="rl-item" onclick="filterByRegion('${escAttr(r.region)}','${escAttr(r.region_code||'')}')">
+        <div class="rl-name">${escHTML(r.region)}</div>
+        <div class="rl-cnt">${r.product_count}</div>
+      </div>`;
+    });
+    document.getElementById("regionList").innerHTML = listH;
+    regionLoaded = true;
+  } catch(e) {}
+}
+
+function filterByRegion(region, code) {
+  showTab("products", document.querySelectorAll(".mode-tab")[0]);
+  document.getElementById("productSearch").value = region;
+  loadProducts("", "");
+  // Filter by region_code client-side
+  fetchJSON(`/api/search?region_code=${encodeURIComponent(code||region)}&limit=64`)
+    .then(data => renderGrid(Array.isArray(data)?data:[]))
+    .catch(()=>{});
+}
+
+// Simple tooltip
+let tooltip = null;
+function showTooltip(e, text) {
+  if(!tooltip) { tooltip=document.createElement("div"); tooltip.style.cssText="position:fixed;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--text);pointer-events:none;z-index:500";document.body.appendChild(tooltip); }
+  tooltip.textContent = text;
+  tooltip.style.display = "block";
+  tooltip.style.left = e.clientX+10+"px";
+  tooltip.style.top  = e.clientY-25+"px";
+}
+function hideTooltip() { if(tooltip) tooltip.style.display="none"; }
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function pipeList(v) {
+  if(!v || String(v) === "nan" || String(v) === "None") return [];
+  return String(v).split("|").map(s=>s.trim()).filter(Boolean);
+}
+function cap(s) { return s ? s.charAt(0).toUpperCase()+s.slice(1) : ""; }
+function escHTML(s) {
+  return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function escAttr(s) { return escHTML(s).replace(/'/g,"&#39;"); }
+function loadingHTML() {
+  return `<div style="text-align:center;padding:40px;color:var(--text3)">
+    <div style="width:32px;height:32px;border:2.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px"></div>
+    Loading...</div>`;
+}
+async function fetchJSON(url) {
+  const r = await fetch(url);
+  if(!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadStats();
+loadProducts();
+</script>
+</body>
+</html>
