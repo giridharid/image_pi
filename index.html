@@ -155,7 +155,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;font-family:'DM San
 .facts-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .fact{background:var(--bg3);border-radius:8px;padding:8px 10px}
 .fact-lbl{font-size:8px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text4);margin-bottom:2px}
-.fact-val{font-size:12px;font-weight:600;color:var(--text);font-family:'DM Mono',monospace}
+.fact-val{font-size:11px;font-weight:600;color:var(--text);font-family:'DM Mono',monospace;word-break:break-all;line-height:1.3}
 .fact-val.ok{color:#4ade80}
 
 /* Nutrition */
@@ -771,9 +771,14 @@ function renderDetail(p) {
   if(Object.keys(nutr).length) {
     right += `<div class="card"><div class="card-title">Nutrition (per 100g)</div>
     <table class="nutr-table">`;
-    for(const [nm,nv] of Object.entries(nutr))
+    for(const [nm,nv] of Object.entries(nutr)) {
+      let unit = String(nv.unit||"g");
+      // Clean up units like "% by wt", "% m/m" → g
+      if(unit.includes("%") || unit.toLowerCase().includes("by wt") || unit.toLowerCase().includes("m/m"))
+        unit = "g";
       right += `<tr class="${HL.has(nm)?"hl":""}"><td>${escHTML(nm)}</td>
-        <td>${nv.value} ${escHTML(nv.unit||"g")}</td></tr>`;
+        <td>${nv.value} ${escHTML(unit)}</td></tr>`;
+    }
     right += `</table></div>`;
   }
 

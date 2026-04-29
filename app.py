@@ -376,8 +376,11 @@ def autocomplete(q: str = ""):
 def get_product(id: str):
     items = get_cache("products") or []
     for p in items:
-        if str(p.get("barcode") or "") == id or \
-           str(p.get("acquink_id") or "") == id:
+        bc  = str(p.get("barcode") or "").strip()
+        acq = str(p.get("acquink_id") or "").strip()
+        barcode_match = bc == id and bc not in ("nan","None","","<NA>")
+        acquink_match = acq == id
+        if barcode_match or acquink_match:
             result = dict(p)
             p = derive_images(p)
             result["nutrition"]     = build_nutrition(p)
