@@ -3,3 +3,4 @@ uvicorn[standard]==0.29.0
 google-cloud-bigquery==3.20.1
 google-auth==2.29.0
 google-cloud-aiplatform==1.49.0
+grpcio-status==1.62.3
