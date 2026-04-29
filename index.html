@@ -445,7 +445,7 @@ body.light .det-left{background:var(--bg2)}
 
 <div class="footer">
   <span>Product Intelligence · <span class="masi">MASI</span> by Acquink Solutions</span>
-  <span>gen-lang-client-0143536012 · gs1_datakart</span>
+  <span>v1.0 · 29 Apr 2026</span>
 </div>
 
 <script>
@@ -809,7 +809,7 @@ function renderDetail(p) {
     </div>
     <div id="intelContent-${escHTML(pid)}">
       ${hasIntel
-        ? `<div class="intel-output">${formatMD(p.intelligence_text)}</div>`
+        ? `<div class="intel-output">${typeof marked !== "undefined" ? marked.parse(p.intelligence_text||"") : (p.intelligence_text||"").replace(/\n/g,"<br>")}</div>`
         : `<div style="color:var(--text4);font-size:12px;font-style:italic;padding:4px 0">Generating intelligence...</div>`
       }
     </div>
@@ -1054,25 +1054,13 @@ async function generateIntel(pid, ptype) {
     });
     const d = await res.json();
     if(d.intelligence) {
-      el.innerHTML = `<div class="intel-output">${formatMD(d.intelligence)}</div>`;
+      el.innerHTML = `<div class="intel-output">${typeof marked !== "undefined" ? marked.parse(d.intelligence||"") : (d.intelligence||"").replace(/\n/g,"<br>")}</div>`;
     } else {
       el.innerHTML = `<div style="color:var(--text4);font-size:12px">No intelligence available for this product.</div>`;
     }
   } catch(e) {
     el.innerHTML = `<div style="color:var(--text4);font-size:12px">Could not load intelligence.</div>`;
   }
-}
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-function formatMD(text) {
-  if(!text) return "";
-  return String(text)
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*(.*?)\*/g, "<em>$1</em>")
-    .replace(/`(.*?)`/g, "<code>$1</code>")
-    .replace(/^#{1,3}\s+(.*)$/gm, "<strong>$1</strong>")
-    .replace(/
-/g, "<br>");
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
