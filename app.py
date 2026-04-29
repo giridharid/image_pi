@@ -319,6 +319,7 @@ async def logo():
     return FileResponse("acquink_logo.png", media_type="image/png")
 
 @app.get("/health")
+@app.get("/api/health")
 async def health():
     return {"status": "healthy" if get_bq() else "degraded",
             "bq": bool(get_bq()), "gemini": bool(get_gemini()),
@@ -374,11 +375,16 @@ def autocomplete(q: str = ""):
 
 @app.get("/api/product/{id}")
 def get_product(id: str):
+    if not id or id in ("nan","None","<NA>",""):
+        raise HTTPException(404, "Invalid product ID")
     items = get_cache("products") or []
     for p in items:
         bc  = str(p.get("barcode") or "").strip()
         acq = str(p.get("acquink_id") or "").strip()
-        barcode_match = bc == id and bc not in ("nan","None","","<NA>")
+        # Normalise — treat <NA> as empty
+        if bc in ("nan","None","<NA>",""): bc = ""
+        if acq in ("nan","None","<NA>",""): acq = ""
+        barcode_match = bc == id
         acquink_match = acq == id
         if barcode_match or acquink_match:
             result = dict(p)
