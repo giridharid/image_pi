@@ -662,8 +662,9 @@ async function openDetail(id) {
     if(document.getElementById("chatPanel").classList.contains("open"))
       updateChatContext();
   } catch(e) {
+    console.error("openDetail error:", e.message, e.stack);
     document.getElementById("detailLayout").innerHTML =
-      `<div style="padding:20px;color:var(--text3)">Product not found</div>`;
+      `<div style="padding:20px;color:var(--text3)">Error: ${e.message}</div>`;
   }
 }
 
