@@ -590,8 +590,10 @@ async function loadProducts(q="", type="") {
   document.getElementById("productGrid").innerHTML = loadingHTML();
   try {
     let url = `/api/search`;
-    if(q)    url += `&q=${encodeURIComponent(q)}`;
-    if(type) url += `&product_type=${type}`;
+    const params = [];
+    if(q)    params.push(`q=${encodeURIComponent(q)}`);
+    if(type) params.push(`product_type=${type}`);
+    if(params.length) url += `?` + params.join(`&`);
     const data = await fetchJSON(url);
     renderGrid(Array.isArray(data) ? data : []);
   } catch(e) {
