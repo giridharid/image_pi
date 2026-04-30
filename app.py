@@ -374,7 +374,7 @@ def get_regions():
     return get_cache("regions") or []
 
 @app.get("/api/search")
-def search(q: str = "", product_type: str = "", region_code: str = "", limit: int = 60):
+def search(q: str = "", product_type: str = "", region_code: str = "", limit: int = 0):
     items = get_cache("products") or []
     if q:
         ql = q.lower()
@@ -389,7 +389,7 @@ def search(q: str = "", product_type: str = "", region_code: str = "", limit: in
     if region_code:
         items = [p for p in items
                  if region_code.upper() in (p.get("region_codes") or "")]
-    return items[:limit]
+    return items[:limit] if limit > 0 else items
 
 @app.get("/api/autocomplete")
 def autocomplete(q: str = ""):
