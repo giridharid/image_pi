@@ -334,14 +334,7 @@ body.light .det-left{background:#f8f7fd}
 
 <!-- Filter row -->
 <div class="filter-row" id="filterRow">
-  <div class="fchip on" onclick="setFilter(this,'')">All <span id="cnt-all"></span></div>
-  <div class="fchip" onclick="setFilter(this,'food')">Food <span id="cnt-food"></span></div>
-  <div class="fchip" onclick="setFilter(this,'beverage')">Beverage <span id="cnt-beverage"></span></div>
-  <div class="fchip" onclick="setFilter(this,'spice')">Spice <span id="cnt-spice"></span></div>
-  <div class="fchip" onclick="setFilter(this,'cosmetic')">Cosmetic <span id="cnt-cosmetic"></span></div>
-  <div class="fchip" onclick="setFilter(this,'household')">Household <span id="cnt-household"></span></div>
-  <div class="fchip" onclick="setFilter(this,'cleaning')">Cleaning <span id="cnt-cleaning"></span></div>
-  <div class="fchip" onclick="setFilter(this,'toy')">Toy <span id="cnt-toy"></span></div>
+  <div class="fchip on" id="chip-all" onclick="setFilter(this,'')">All <span id="cnt-all"></span></div>
 </div>
 
 <!-- Main -->
@@ -435,8 +428,8 @@ body.light .det-left{background:#f8f7fd}
 </div><!-- main -->
 
 <div class="footer">
-  <span>Product Intelligence Made for Gs1· <span class="masi">MASI</span> by Acquink Solutions</span>
-  <span>v1.0 · 30 Apr 2026</span>
+  <span>Product Intelligence Made for GS1 · <span class="masi">MASI</span> by Acquink Solutions · <span id="footerDate"></span></span>
+  <span>v1.0 · 29 Apr 2026</span>
 </div>
 
 <script>
@@ -574,14 +567,33 @@ async function loadStats() {
     const types = d.product_types || {};
     const food = (types.food||0)+(types.spice||0)+(types.pickle||0)+(types.beverage||0);
     const el = (id,v) => { const e=document.getElementById(id); if(e&&v) e.textContent=`(${v})`; };
-    el("cnt-all",   d.total_products);
-    el("cnt-food",  types.food||0);
-    el("cnt-spice", types.spice||0);
-    el("cnt-cosmetic", types.cosmetic||0);
-    el("cnt-household", types.household||0);
-    el("cnt-cleaning", types.cleaning||0);
-    el("cnt-toy",      types.toy||0);
-    el("cnt-beverage", types.beverage||0);
+    // Update All chip count
+    el("cnt-all", d.total_products);
+
+    // Dynamically render category chips from product_types
+    const chipBar = document.getElementById("chip-all").parentElement;
+    // Remove old dynamic chips (keep the All chip)
+    chipBar.querySelectorAll(".fchip-dynamic").forEach(c => c.remove());
+
+    // Label map for display
+    const labelMap = {
+      food:"Food", beverage:"Beverage", spice:"Spice", cosmetic:"Cosmetic",
+      household:"Household", cleaning:"Cleaning", toy:"Toy", pharma:"Pharma",
+      incense:"Incense", medical_device:"Medical Device", pickle:"Pickle", unknown:"Other"
+    };
+    // Sort by count descending
+    const ptypes = d.product_types || {};
+    Object.entries(ptypes)
+      .sort((a,b) => b[1]-a[1])
+      .forEach(([type, count]) => {
+        if(!count) return;
+        const label = labelMap[type] || (type.charAt(0).toUpperCase()+type.slice(1));
+        const chip = document.createElement("div");
+        chip.className = "fchip fchip-dynamic";
+        chip.innerHTML = `${label} <span>(${count})</span>`;
+        chip.onclick = function(){ setFilter(this, type); };
+        chipBar.appendChild(chip);
+      });
   } catch(e) {}
 }
 
@@ -1138,6 +1150,9 @@ async function generateIntel(pid, ptype) {
 loadStats();
 loadProducts();
 loadAccuracy();
+// Set footer date
+const fd = document.getElementById("footerDate");
+if(fd) fd.textContent = new Date().toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"});
 </script>
 </body>
 </html>
